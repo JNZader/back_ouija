@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+
+# Compilado
+dist/
+build/
+
+# Cobertura
+coverage/
+.nyc_output/
+
+# Prisma
+prisma/migrations/
+generated/
+
+# Archivos de configuración que no necesitan formato
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Archivos temporales
+*.log
+*.tmp
+.temp/
+
+# TypeScript
+*.tsbuildinfo
+
+# Documentación
+*.md
