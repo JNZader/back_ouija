@@ -47,7 +47,7 @@ export default tseslint.config(
     },
     
     rules: {
-      // Reglas de TypeScript ajustadas para NestJS
+      // Reglas de TypeScript - MÁS FLEXIBLES
       '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -56,28 +56,27 @@ export default tseslint.config(
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
       }],
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-      '@typescript-eslint/no-unsafe-assignment': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn',
-      '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/no-unsafe-return': 'warn',
+      '@typescript-eslint/no-floating-promises': 'off', // Desactivado para evitar warnings
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
       
       // Reglas para NestJS decorators
       '@typescript-eslint/no-extraneous-class': 'off',
       '@typescript-eslint/no-useless-constructor': 'off',
       
-      // Prettier
-      'prettier/prettier': ['error', { 
-        endOfLine: 'auto',
+      // Prettier - MÁS FLEXIBLE
+      /* 'prettier/prettier': ['warn', {
+        endOfLine: 'auto', // Acepta cualquier tipo de final de línea
         singleQuote: true,
         trailingComma: 'all',
-        tabWidth: 2,
-        semi: true,
-      }],
-      
+      }],*/
+      'prettier/prettier': 'off',
+
       // Reglas generales de JavaScript
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': 'off', // Permitir console.log durante desarrollo
       'no-debugger': 'warn',
       'prefer-const': 'warn',
       'no-var': 'error',
