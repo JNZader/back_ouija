@@ -29,7 +29,6 @@ async function bootstrap() {
 
   console.log(`Ouija Virtual Backend running on port ${port}`);
   console.log(`CORS enabled for: ${corsOrigins.join(', ')}`);
-  console.log(`Ollama URL: ${process.env.OLLAMA_URL || 'Not configured'}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 }
 

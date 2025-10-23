@@ -10,14 +10,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Modelo principal de respuestas
 model FallbackResponse {
-  id  String @id @default(uuid())
-  personality String  // 'wise' | 'cryptic' | 'dark' | 'playful'
-  category  String  // 'love' | 'career' | 'health' | 'family' | 'death' | 'future' | 'money' | 'spirituality' | 'general'
-  language  String  // 'es' | 'en'
-  text  String
-  keywords  String  // JSON array of keywords for matching
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  personality String // 'wise' | 'cryptic' | 'dark' | 'playful'
+  language    String // 'es' | 'en'
+  category    String // 'love', 'career', 'health', 'general', etc.
+  text        String // La respuesta en sí
+  createdAt   DateTime @default(now())
 
-  @@index([personality, category, language])
+  // Relación muchos-a-muchos con Keywords
+  keywords ResponseKeyword[]
+
+  @@index([personality, language, category])
+}
+
+// Modelo de keywords únicas
+model Keyword {
+  id       Int    @id @default(autoincrement())
+  word     String // La keyword en minúsculas: "amor", "pareja", etc.
+  language String // 'es' | 'en'
+
+  // Relación muchos-a-muchos con Responses
+  responses ResponseKeyword[]
+
+  // Una keyword es única por idioma
+  @@unique([word, language])
+  @@index([word])
+}
+
+// join table para la relación muchos-a-muchos
+model ResponseKeyword {
+  responseId Int
+  keywordId  Int
+
+  // Relaciones
+  response FallbackResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  keyword  Keyword          @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  // Clave compuesta: una respuesta puede tener una keyword solo una vez
+  @@id([responseId, keywordId])
+  // Índices para mejorar performance de queries
+  @@index([responseId])
+  @@index([keywordId])
 }
