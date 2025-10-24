@@ -21,9 +21,9 @@ export class ResponsesService{
     }
 
     async getResponse(
-        personality?: Personality,
-        language?: Language,
-        category?: Category
+        personality: Personality,
+        language: Language,
+        category: Category
     ): Promise<Result>{
 
         /**

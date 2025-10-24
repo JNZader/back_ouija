@@ -3,7 +3,6 @@ import { ResponsesService } from './responses.service';
 import { ClasifierService } from './classifier.service';
 import { Language, Personality } from '../enums';
 import { OuijaQuestionDto } from '../dto/ouija-question.dto';
-import { metadata } from 'reflect-metadata/no-conflict';
 
 @Injectable()
 export class OuijaService {

@@ -20,6 +20,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
@@ -30,6 +31,7 @@ async function bootstrap() {
   console.log(`Ouija Virtual Backend running on port ${port}`);
   console.log(`CORS enabled for: ${corsOrigins.join(', ')}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Endpoint: POST http://localhost:` + port + `/ouija/ask`);
 }
 
 void bootstrap();
