@@ -30,7 +30,7 @@ export class ClasifierService {
       'romance',
       'kiss',
     ],
-    carrer: [
+    career: [
       'trabajo',
       'empleo',
       'carrera',
