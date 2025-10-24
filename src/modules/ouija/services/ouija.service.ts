@@ -31,20 +31,20 @@ export class OuijaService {
 
     this.logger.log(`Processing question from user ${userId} with personality ${personality}`);
 
-    const result = await this.responses.getResponse(personality, language, category);
+    const result = await this.responses.getResponse(userId, personality, language, category);
 
     const elapsedTime = Date.now() - startTime;
-    
-    return{
-        question: dto.question,
-        response:result.text,
-        personality,
-        language,
-        category: result.category,
-        source: 'database',
-        model:'fallback-v1',
-        responseTime: elapsedTime,
-        metadata: result.metadata,
+
+    return {
+      question: dto.question,
+      response: result.text,
+      personality,
+      language,
+      category: result.category,
+      source: 'database',
+      model: 'fallback-v1',
+      responseTime: elapsedTime,
+      metadata: result.metadata,
     };
   }
 }
