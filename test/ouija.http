@@ -1,0 +1,20 @@
+### Probar el endpoint /ouija/ask
+POST http://localhost:3001/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-user-rest-client
+
+{
+  "question": "¿Funcionará esta extensión?",
+  "language": "es"
+}
+
+### Otra prueba (personalidad cryptic)
+POST http://localhost:3001/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-user-rest-client-2
+
+{
+  "question": "¿Cuál es el secreto?",
+  "personality": "cryptic",
+  "language": "es"
+}
