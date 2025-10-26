@@ -7,11 +7,6 @@ import { ResponsesService } from './services/responses.service';
 
 @Module({
   controllers: [OuijaController],
-  providers: [
-    NormalizerService,
-    OuijaService,
-    ClasifierService,
-    ResponsesService,
-  ],
+  providers: [NormalizerService, OuijaService, ClasifierService, ResponsesService],
 })
 export class OuijaModule {}

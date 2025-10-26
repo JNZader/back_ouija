@@ -5,9 +5,6 @@ import { Category } from '../enums';
 @Injectable()
 export class ClasifierService {
   private readonly logger = new Logger(ClasifierService.name);
-
-  constructor(private readonly normalizer: NormalizerService) {}
-
   private readonly categoryKeywords: Record<string, string[]> = {
     love: [
       'amor',
@@ -171,6 +168,8 @@ export class ClasifierService {
       'meditation',
     ],
   };
+
+  constructor(private readonly normalizer: NormalizerService) {}
 
   categorizeQuestion(question: string): Category {
     const normalized = this.normalizer.normalize(question);

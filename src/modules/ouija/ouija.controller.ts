@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, HttpStatus, Post, Headers } from '@nestjs/common';
+import { Body, Controller, Headers, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { OuijaQuestionDto } from './dto/ouija-question.dto';
 import { OuijaService } from './services/ouija.service';
 
