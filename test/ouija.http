@@ -1,3 +1,12 @@
+# ==================================================================
+# Testing  
+# ==================================================================
+#
+# Instrucciones: # 1. Instala la extensión "REST Client" en VSCode
+# 2. Haz clic en "Send Request" sobre cada petición
+# 3. Verifica los resultados según las notas de cada test
+#
+# ==================================================================
 ### Probar el endpoint /ouija/ask
 POST http://localhost:3001/ouija/ask
 Content-Type: application/json
@@ -15,6 +24,191 @@ X-Session-Id: test-user-rest-client-2
 
 {
   "question": "¿Cuál es el secreto?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+@baseUrl = http://localhost:3001
+@sessionId = test-etapa3
+
+### ===============================================================
+### Test 1: Pregunta sobre AMOR (debe tener keyword-match)
+### ===============================================================
+# Verifica:
+#   - method: 'keyword-match'
+#   - matchScore > 0
+#   - matchedKeywords contiene 'amor' y/o 'vida'
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Encontraré el amor de mi vida este año?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### ==============================================================
+### Test 2: Pregunta sobre TRABAJO (debe tener keyword-match)
+### ==============================================================
+# Verifica:
+#   - method: 'keyword-match'
+#   - matchScore > 0
+#   - matchedKeywords contiene 'trabajo' y/o 'ascenso'
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Me ascenderán en mi trabajo este mes?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### ===============================================================
+### Test 3: Pregunta sobre SALUD (debe tener keyword-match)
+### ===============================================================
+# Verifica:
+#   - method: 'keyword-match'
+#   - matchScore > 0
+#   - matchedKeywords contiene 'salud', 'enfermedad', etc.
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Mejoraré de mi enfermedad pronto?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### ==============================================================
+### Test 4: Pregunta GENÉRICA (debe usar random)
+### ==============================================================
+# Verifica:
+#   - method: 'random' (no encontró keywords relevantes)
+#   - matchScore: 0
+#   - matchedKeywords: undefined o []
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "Hola espíritu, ¿estás ahí?",
+  "personality": "playful",
+  "language": "es"
+}
+
+### ==============================================================
+### Test 5a: Anti-repetición + Keyword Matching (Request 1)
+### ==============================================================
+# Verifica:
+#   - Todas usan method: 'keyword-match'
+#   - Todas tienen matchScore > 0
+#   - availableResponses disminuye: N, N-1, N-2
+#   - Las respuestas son DIFERENTES (anti-repetición funciona)
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-multi
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### Test 5b: Anti-repetición + Keyword Matching (Request 2)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-multi
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### Test 5c: Anti-repetición + Keyword Matching (Request 3)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-multi
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### =================================================================
+### Test 6a: Coincidencia EXACTA (palabra completa)
+### =================================================================
+# Verifica:
+#   - matchScore más alto (2 puntos por palabra exacta)
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-scoring-exact
+
+{
+  "question": "amor pareja corazón",
+  "personality": "wise",
+  "language": "es"
+}
+
+### Test 6b: Coincidencia PARCIAL (substring)
+# Verifica:
+#   - matchScore más bajo (1 punto por palabra parcial)
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-scoring-partial
+
+{
+  "question": "enamorado trabajando",
+  "personality": "wise",
+  "language": "es"
+}
+
+### ===============================================================
+### Test 7a: Categoría FUTURO
+### ===============================================================
+# Verifica:
+#   - category detecta correctamente
+#   - matchedKeywords corresponden a la categoría
+
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-categories
+
+{
+  "question": "¿Qué me depara el destino?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+### Test 7b: Categoría DINERO
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-categories
+
+{
+  "question": "¿Tendré éxito financiero?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+### Test 7c: Categoría FAMILIA
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: test-categories
+
+{
+  "question": "¿Cómo está mi madre?",
   "personality": "cryptic",
   "language": "es"
 }

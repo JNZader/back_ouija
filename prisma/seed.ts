@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-import { Personality, Language, Category } from '../src/modules/ouija/enums';
+import { Category, Language, Personality } from '../src/modules/ouija/enums';
 
 const prisma = new PrismaClient();
 
@@ -7783,7 +7783,6 @@ async function main() {
   console.log('Insertando relaciones (response ↔ keyword)...');
   await prisma.responseKeyword.createMany({ data: relations });
   console.log(`Insertadas ${relations.length} relaciones\n`);
-
 
   console.log('\n✅ Base de datos poblada exitosamente!');
   console.log(`📊 Total keywords: ${keywords.length}`);
