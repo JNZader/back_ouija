@@ -1,16 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Personality, Language, Category } from '../enums';
+import { Category, Language, Personality } from '../enums';
 
 interface Result {
   text: string;
   matchScore: number;
   category: Category;
-  method: 'random';
+  method: 'random' | 'keyword-match';
   metadata?: {
     totalResponses?: number;
-    avalibleResponses?: number;
+    availableResponses?: number;
     sessionReset?: boolean;
+    matchedKeywords?: string[];
   };
 }
 
@@ -21,7 +22,7 @@ export class ResponsesService {
   private userHistory = new Map<
     string,
     {
-      userIds: Set<number>;
+      usedResponses: Set<number>;
       lastAccess: number;
     }
   >();
@@ -30,7 +31,13 @@ export class ResponsesService {
     this.logger.log('Fallback service inicializado');
   }
 
-  async getResponse(userId: string, personality: Personality, language: Language, category: Category): Promise<Result> {
+  async getResponse(
+    userId: string,
+    personality: Personality,
+    language: Language,
+    category: Category,
+    question: string,
+  ): Promise<Result> {
     /**
      * busca respuestas en la base de datos
      */
@@ -41,10 +48,12 @@ export class ResponsesService {
         language,
         category,
       },
-      select: {
-        id: true,
-        text: true,
-        category: true,
+      include: {
+        keywords: {
+          include: {
+            keyword: true,
+          },
+        },
       },
     });
 
@@ -61,11 +70,10 @@ export class ResponsesService {
      * si hay respuestas selecciona una al azar
      */
 
-    const selectedResponse = this.selectedRandomForUser(userId, responses);
-
     /**
      * retorna la respuesta seleccionada
      */
+    const selectedResponse = this.selectBestMatch(userId, responses, question);
 
     return {
       text: selectedResponse.text,
@@ -76,39 +84,107 @@ export class ResponsesService {
     };
   }
 
-  private selectedRandomForUser(
+  getActiveSessions() {
+    const sessions = Array.from(this.userHistory.entries()).map(([userId, session]) => ({
+      userId,
+      usedResponsesCount: session.usedResponses.size,
+      lastAccessAgo: Date.now() - session.lastAccess,
+    }));
+
+    return {
+      totalSessions: this.userHistory.size,
+      sessions,
+    };
+  }
+
+  private calculateMatchScore(question: string, responseKeywords: string[]): { score: number; matched: string[] } {
+    const questionWords = question
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((word) => word.length >= 3);
+    const matched: string[] = [];
+    let score = 0;
+
+    for (const keyword of responseKeywords) {
+      const keywordLower = keyword.toLowerCase();
+
+      if (questionWords.includes(keywordLower)) {
+        score += 2;
+        matched.push(keyword);
+      } else if (questionWords.some((word) => word.includes(keywordLower) || keywordLower.includes(word))) {
+        score += 1;
+        matched.push(keyword);
+      }
+    }
+
+    return { score, matched };
+  }
+
+  private selectBestMatch(
     userId: string,
-    responses: {
+    responses: Array<{
       id: number;
-      category: string;
       text: string;
-    }[],
+      category: string;
+      keywords: Array<{
+        keyword: {
+          word: string;
+        };
+      }>;
+    }>,
+    question: string,
   ): Result {
     const userSession = this.getUserSession(userId);
 
-    let avalibleResponses = responses.filter((response) => !userSession.userIds.has(response.id));
+    let availableResponses = responses.filter((response) => !userSession.usedResponses.has(response.id));
 
     let sessionReset = false;
 
-    if (avalibleResponses.length === 0) {
-      userSession.userIds.clear();
-      avalibleResponses = responses;
+    if (availableResponses.length === 0) {
+      this.logger.log(`User ${userId}: All responses exhausted, resetting session`);
+      userSession.usedResponses.clear();
+      availableResponses = responses;
       sessionReset = true;
     }
 
-    const randomIndex = Math.floor(Math.random() * avalibleResponses.length);
-    const selected = avalibleResponses[randomIndex];
-    userSession.userIds.add(selected.id);
+    const scoredResponses = availableResponses.map((response) => {
+      const keywords = response.keywords.map((k) => k.keyword.word);
+
+      const { score, matched } = this.calculateMatchScore(question, keywords);
+
+      return {
+        response,
+        score,
+        matchedKeywords: matched,
+      };
+    });
+
+    scoredResponses.sort((a, b) => b.score - a.score);
+
+    const best = scoredResponses[0];
+
+    const method = best.score > 0 ? 'keyword-match' : 'random';
+
+    const selected = method === 'random' ? scoredResponses[Math.floor(Math.random() * scoredResponses.length)] : best;
+
+    userSession.usedResponses.add(selected.response.id);
+
+    this.logger.log(
+      `User ${userId}: Selected response #${selected.response.id} ` +
+        `(method: ${method}, score: ${selected.score}, ` +
+        `matched: [${selected.matchedKeywords.join(', ')}])`,
+    );
 
     return {
-      text: selected.text,
-      matchScore: 0,
-      category: selected.category as Category,
-      method: 'random',
+      text: selected.response.text,
+      matchScore: selected.score,
+      category: selected.response.category as Category,
+      method,
       metadata: {
         totalResponses: responses.length,
-        avalibleResponses: avalibleResponses.length,
+        availableResponses: availableResponses.length,
         sessionReset,
+        matchedKeywords: selected.matchedKeywords.length > 0 ? selected.matchedKeywords : undefined,
       },
     };
   }
@@ -118,14 +194,14 @@ export class ResponsesService {
 
     if (!userSession) {
       userSession = {
-        userIds: new Set<number>(),
+        usedResponses: new Set<number>(),
         lastAccess: Date.now(),
       };
-
       this.userHistory.set(userId, userSession);
     } else {
       userSession.lastAccess = Date.now();
     }
+
     return userSession;
   }
 }
