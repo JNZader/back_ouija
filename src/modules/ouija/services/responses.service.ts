@@ -20,6 +20,31 @@ interface Result {
   };
 }
 
+export interface Stats {
+  database: {
+    total: number;
+    byPersonality: Record<string, number>;
+    byLanguage: Record<string, number>;
+    byCategory: Record<string, number>;
+  };
+  sessions: {
+    active: number;
+    maxAllowed: number;
+    ttl: string;
+    memoryUsage: string;
+    avgResponsesPerSession: number;
+  };
+  performance: {
+    uptime: string;
+    totalRequests: number;
+    fallbackUsage: {
+      categoryToGeneral: number;
+      genericResponses: number;
+      fallbackRate: string;
+    };
+  };
+}
+
 @Injectable()
 export class ResponsesService {
   private readonly logger = new Logger(ResponsesService.name);
@@ -34,8 +59,19 @@ export class ResponsesService {
 
   private cleanupInterval: NodeJS.Timeout | null = null;
 
+  private startTime = Date.now();
+  private totalRequests = 0;
+  private fallbackStats = {
+    categoryToGeneral: 0,
+    genericResponses: 0,
+  };
+
   constructor(private readonly prisma: PrismaService) {
     this.logger.log('Responses service inicializado');
+
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.debug = () => {}; // deshabilitar debug en produccion
+    }
   }
 
   onModuleInit() {
@@ -65,6 +101,8 @@ export class ResponsesService {
     /**
      * busca respuestas en la base de datos
      */
+    this.totalRequests++;
+    this.logger.log(`Buscando respuesta para: ${personality}/${language}/${category}`);
 
     const responses = await this.prisma.fallbackResponse.findMany({
       where: {
@@ -89,6 +127,8 @@ export class ResponsesService {
       this.logger.warn(`No responses for category '${category}', trying cascade to 'GENERAL'`);
 
       if (category !== Category.GENERAL) {
+        this.fallbackStats.categoryToGeneral++;
+
         return this.getResponse(
           userId,
           personality,
@@ -98,6 +138,8 @@ export class ResponsesService {
           originalCategory || category,
         );
       }
+
+      this.fallbackStats.genericResponses++;
 
       return this.getGenericResponse(personality, language, originalCategory || category);
     }
@@ -338,5 +380,63 @@ export class ResponsesService {
         `removidas ${toRemove} sesiones ` +
         ` Quedan ${this.userHistory.size} sesiones activas.`,
     );
+  }
+
+  async getStats(): Promise<Stats> {
+    const [total, byPersonality, byCategory, byLanguage] = await Promise.all([
+      this.prisma.fallbackResponse.count(),
+      this.prisma.fallbackResponse.groupBy({
+        by: ['personality'],
+        _count: true,
+      }),
+      this.prisma.fallbackResponse.groupBy({
+        by: ['category'],
+        _count: true,
+      }),
+      this.prisma.fallbackResponse.groupBy({
+        by: ['language'],
+        _count: true,
+      }),
+    ]);
+
+    const activeSessions = this.userHistory.size;
+    const avgResponsesPerSession =
+      activeSessions > 0
+        ? Array.from(this.userHistory.values()).reduce((sum, session) => sum + session.usedResponses.size, 0) /
+          activeSessions
+        : 0;
+
+    const memoryKB = (activeSessions * (0.1 + avgResponsesPerSession * 0.004)).toFixed(2);
+
+    const uptimeMs = Date.now() - this.startTime;
+    const uptimeHours = (uptimeMs / (1000 * 60 * 60)).toFixed(2);
+
+    const totalFallbacks = this.fallbackStats.categoryToGeneral + this.fallbackStats.genericResponses;
+    const fallbackRate = this.totalRequests > 0 ? ((totalFallbacks / this.totalRequests) * 100).toFixed(2) + '%' : '0%';
+
+    return {
+      database: {
+        total,
+        byPersonality: Object.fromEntries(byPersonality.map((item) => [item.personality, item._count])),
+        byLanguage: Object.fromEntries(byLanguage.map((item) => [item.language, item._count])),
+        byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
+      },
+      sessions: {
+        active: activeSessions,
+        maxAllowed: MAX_SESSION,
+        ttl: `${SESSION_TTL / 1000 / 60} minutos`,
+        memoryUsage: `${memoryKB} KB`,
+        avgResponsesPerSession: parseFloat(avgResponsesPerSession.toFixed(2)),
+      },
+      performance: {
+        uptime: `${uptimeHours} horas`,
+        totalRequests: this.totalRequests,
+        fallbackUsage: {
+          categoryToGeneral: this.fallbackStats.categoryToGeneral,
+          genericResponses: this.fallbackStats.genericResponses,
+          fallbackRate,
+        },
+      },
+    };
   }
 }

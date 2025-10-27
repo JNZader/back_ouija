@@ -32,4 +32,9 @@ export class OuijaController {
   getActiveSessions() {
     return this.responsesService.getActiveSessions();
   }
+
+  @Get('responses/stats')
+  async getResponsesStats() {
+    return this.responsesService.getStats();
+  }
 }

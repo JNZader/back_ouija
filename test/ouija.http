@@ -213,3 +213,13 @@ X-Session-Id: test-categories
 #   - (Primero ejecuta algunos tests anteriores para generar sesiones)
 
 GET {{baseUrl}}/ouija/responses/sessions
+
+### ===============================================================
+### TEST 1: Endpoint de Estadísticas Completas
+### ===============================================================
+### Verifica:
+###   - Status: 200
+###   - Estructura correcta con database, sessions, performance
+###   - totalRequests >= 4 (por los tests de preparación)
+
+GET {{baseUrl}}/ouija/responses/stats
