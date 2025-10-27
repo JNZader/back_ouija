@@ -9,13 +9,14 @@ const MAX_SESSION = 1000; // maximo 1000 sesiones activas
 interface Result {
   text: string;
   matchScore: number;
-  category: Category;
-  method: 'random' | 'keyword-match';
+  category: Category | 'general';
+  method: 'random' | 'keyword-match' | 'fallback-general';
   metadata?: {
     totalResponses?: number;
     availableResponses?: number;
     sessionReset?: boolean;
     matchedKeywords?: string[];
+    cascadeFrom?: Category;
   };
 }
 
@@ -59,6 +60,7 @@ export class ResponsesService {
     language: Language,
     category: Category,
     question: string,
+    originalCategory?: Category,
   ): Promise<Result> {
     /**
      * busca respuestas en la base de datos
@@ -84,18 +86,33 @@ export class ResponsesService {
      */
 
     if (responses.length === 0) {
-      this.logger.warn('no encontro respuestas');
-      throw new Error('no encontro respuestas');
-    }
+      this.logger.warn(`No responses for category '${category}', trying cascade to 'GENERAL'`);
 
-    /**
-     * si hay respuestas selecciona una al azar
-     */
+      if (category !== Category.GENERAL) {
+        return this.getResponse(
+          userId,
+          personality,
+          language,
+          Category.GENERAL,
+          question,
+          originalCategory || category,
+        );
+      }
+
+      return this.getGenericResponse(personality, language, originalCategory || category);
+    }
 
     /**
      * retorna la respuesta seleccionada
      */
     const selectedResponse = this.selectBestMatch(userId, responses, question);
+
+    if (originalCategory && originalCategory !== category) {
+      selectedResponse.metadata = {
+        ...selectedResponse.metadata,
+        cascadeFrom: originalCategory,
+      };
+    }
 
     return {
       text: selectedResponse.text,
@@ -105,16 +122,65 @@ export class ResponsesService {
       metadata: selectedResponse.metadata,
     };
   }
+  private getGenericResponse(
+    personality: Personality,
+    language: Language,
+    originalCategory: Category,
+  ): Result | PromiseLike<Result> {
+    const genericResponses = {
+      [Language.ES]: {
+        [Personality.WISE]:
+          'Los espíritus antiguos observan tu pregunta con atención. La respuesta se revelará cuando el momento sea propicio. Confía en el camino que se despliega ante ti.',
+        [Personality.CRYPTIC]:
+          'Las sombras del más allá murmuran secretos que aún no puedo descifrar completamente. Vuelve a consultar cuando la luna esté más alta en el cielo nocturno.',
+        [Personality.DARK]:
+          'La oscuridad eterna no revela sus secretos tan fácilmente a los mortales. Deberás buscar más profundo en los rincones oscuros de tu propia alma.',
+        [Personality.PLAYFUL]:
+          '¡Ups! Parece que los espíritus traviesos están jugando al escondite hoy. ¿Por qué no intentas con una pregunta diferente? ¡Quizás así aparezcan!',
+      },
+      [Language.EN]: {
+        [Personality.WISE]:
+          'The ancient spirits observe your question with great attention. The answer will be revealed when the time is right. Trust in the path unfolding before you.',
+        [Personality.CRYPTIC]:
+          'The shadows from beyond whisper secrets I cannot yet fully decipher. Ask again when the moon is higher in the night sky.',
+        [Personality.DARK]:
+          'Eternal darkness does not reveal its secrets so easily to mortals. You must search deeper in the dark corners of your own soul.',
+        [Personality.PLAYFUL]:
+          "Oops! It seems the mischievous spirits are playing hide and seek today. Why not try a different question? Maybe then they'll appear!",
+      },
+    };
+
+    // Triple fallback idioma+personalidad → español+personalidad → wise/español
+    const text =
+      genericResponses[language]?.[personality] ||
+      genericResponses[Language.ES]?.[personality] ||
+      genericResponses[Language.ES][Personality.WISE];
+
+    this.logger.warn(`Usando respuesta genérica: ${personality}/${language}`);
+    this.logger.debug(`Original category: ${originalCategory}`);
+
+    return {
+      text,
+      matchScore: 0,
+      category: Category.GENERAL,
+      method: 'fallback-general',
+      metadata: {
+        cascadeFrom: originalCategory,
+        totalResponses: 0,
+        availableResponses: 0,
+      },
+    };
+  }
 
   getActiveSessions() {
     const sessions = Array.from(this.userHistory.entries()).map(([userId, session]) => ({
       userId,
       usedResponsesCount: session.usedResponses.size,
       lastAccessAgo: Date.now() - session.lastAccess,
-      isExpired: (Date.now() - session.lastAccess) > SESSION_TTL,
+      isExpired: Date.now() - session.lastAccess > SESSION_TTL,
     }));
 
-    const expiredCount=sessions.filter(s=>s.isExpired).length;
+    const expiredCount = sessions.filter((s) => s.isExpired).length;
 
     return {
       totalSessions: this.userHistory.size,
@@ -254,7 +320,7 @@ export class ResponsesService {
     this.enforceMaxSessions();
   }
 
-  private enforceMaxSessions():void {
+  private enforceMaxSessions(): void {
     if (this.userHistory.size <= MAX_SESSION) {
       return;
     }
