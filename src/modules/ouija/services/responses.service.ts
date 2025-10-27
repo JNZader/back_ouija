@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Language, Personality } from '../enums';
+import { NormalizerService } from './normalizer.service';
 
 const SESSION_TTL = 1000 * 60 * 60; // 1 hora
 const CLEANUP_INTERVAL = 1000 * 60 * 10; // 10 minutos
@@ -66,7 +67,10 @@ export class ResponsesService {
     genericResponses: 0,
   };
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly normalizer: NormalizerService
+  ) {
     this.logger.log('Responses service inicializado');
 
     if (process.env.NODE_ENV === 'production') {
@@ -235,10 +239,11 @@ export class ResponsesService {
   }
 
   private calculateMatchScore(question: string, responseKeywords: string[]): { score: number; matched: string[] } {
-    const questionWords = question
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((word) => word.length >= 3);
+
+    const normalizedQuestion = this.normalizer.normalize(question);
+
+    const questionWords = normalizedQuestion.split(' ');
+
     const matched: string[] = [];
     let score = 0;
 
