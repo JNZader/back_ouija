@@ -2,6 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Language, Personality } from '../enums';
 
+const SESSION_TTL = 1000 * 60 * 60; // 1 hora
+const CLEANUP_INTERVAL = 1000 * 60 * 10; // 10 minutos
+const MAX_SESSION = 1000; // maximo 1000 sesiones activas
+
 interface Result {
   text: string;
   matchScore: number;
@@ -27,8 +31,26 @@ export class ResponsesService {
     }
   >();
 
+  private cleanupInterval: NodeJS.Timeout | null = null;
+
   constructor(private readonly prisma: PrismaService) {
-    this.logger.log('Fallback service inicializado');
+    this.logger.log('Responses service inicializado');
+  }
+
+  onModuleInit() {
+    this.logger.log('Iniciando limpieza periodica de sesiones');
+
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupOldSessions();
+    }, CLEANUP_INTERVAL);
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+
+      this.logger.log('Cleanup interval cleared');
+    }
   }
 
   async getResponse(
@@ -89,10 +111,17 @@ export class ResponsesService {
       userId,
       usedResponsesCount: session.usedResponses.size,
       lastAccessAgo: Date.now() - session.lastAccess,
+      isExpired: (Date.now() - session.lastAccess) > SESSION_TTL,
     }));
+
+    const expiredCount=sessions.filter(s=>s.isExpired).length;
 
     return {
       totalSessions: this.userHistory.size,
+      expiredSessions: expiredCount,
+      maxSessions: MAX_SESSION,
+      ttl: SESSION_TTL,
+      cleanupInterval: CLEANUP_INTERVAL,
       sessions,
     };
   }
@@ -203,5 +232,45 @@ export class ResponsesService {
     }
 
     return userSession;
+  }
+
+  private cleanupOldSessions(): void {
+    const now = Date.now();
+    let removedCount = 0;
+
+    for (const [userId, session] of this.userHistory.entries()) {
+      const age = now - session.lastAccess;
+
+      if (age > SESSION_TTL) {
+        this.userHistory.delete(userId);
+        removedCount++;
+      }
+    }
+
+    if (removedCount > 0) {
+      this.logger.log(`Limpieza de sesiones: removidas ${removedCount} sesiones antiguas.`);
+    }
+
+    this.enforceMaxSessions();
+  }
+
+  private enforceMaxSessions():void {
+    if (this.userHistory.size <= MAX_SESSION) {
+      return;
+    }
+
+    const sessions = Array.from(this.userHistory.entries()).sort((a, b) => a[1].lastAccess - b[1].lastAccess);
+
+    const toRemove = this.userHistory.size - MAX_SESSION;
+
+    for (let i = 0; i < toRemove; i++) {
+      this.userHistory.delete(sessions[i][0]);
+    }
+
+    this.logger.log(
+      `Limite maximo alcanzado: ${MAX_SESSION} ` +
+        `removidas ${toRemove} sesiones ` +
+        ` Quedan ${this.userHistory.size} sesiones activas.`,
+    );
   }
 }
