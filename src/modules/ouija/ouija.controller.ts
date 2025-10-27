@@ -1,10 +1,14 @@
-import { Body, Controller, Headers, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { OuijaQuestionDto } from './dto/ouija-question.dto';
 import { OuijaService } from './services/ouija.service';
+import { ResponsesService } from './services/responses.service';
 
 @Controller('ouija')
 export class OuijaController {
-  constructor(private readonly ouijaService: OuijaService) {}
+  constructor(
+    private readonly ouijaService: OuijaService,
+    private readonly responsesService: ResponsesService,
+  ) {}
 
   @Post('ask')
   async ask(@Body() dto: OuijaQuestionDto, @Headers('x-session-id') sessionId?: string) {
@@ -22,5 +26,10 @@ export class OuijaController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Get('responses/sessions')
+  getActiveSessions() {
+    return this.responsesService.getActiveSessions();
   }
 }

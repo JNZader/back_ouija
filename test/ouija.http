@@ -1,3 +1,6 @@
+@baseUrl = http://localhost:3001
+@sessionId = test-user
+
 # ==================================================================
 # Testing  
 # ==================================================================
@@ -8,28 +11,16 @@
 #
 # ==================================================================
 ### Probar el endpoint /ouija/ask
-POST http://localhost:3001/ouija/ask
+POST {{baseUrl}}/ouija/ask
 Content-Type: application/json
-X-Session-Id: test-user-rest-client
+X-Session-Id: {{sessionId}}
 
 {
   "question": "¿Funcionará esta extensión?",
   "language": "es"
 }
 
-### Otra prueba (personalidad cryptic)
-POST http://localhost:3001/ouija/ask
-Content-Type: application/json
-X-Session-Id: test-user-rest-client-2
 
-{
-  "question": "¿Cuál es el secreto?",
-  "personality": "cryptic",
-  "language": "es"
-}
-
-@baseUrl = http://localhost:3001
-@sessionId = test-etapa3
 
 ### ===============================================================
 ### Test 1: Pregunta sobre AMOR (debe tener keyword-match)
@@ -212,3 +203,13 @@ X-Session-Id: test-categories
   "personality": "cryptic",
   "language": "es"
 }
+
+### ===============================================================
+### Test 8: Obtener sesiones activas
+### ===============================================================
+# Verifica:
+#   - Retorna un objeto con las sesiones activas
+#   - Cada sesión contiene: sessionId, usedResponseIds, lastActivity
+#   - (Primero ejecuta algunos tests anteriores para generar sesiones)
+
+GET {{baseUrl}}/ouija/responses/sessions
