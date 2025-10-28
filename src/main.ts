@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,10 +17,13 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.useGlobalFilters(new AllExceptionsFilter());
+
   // Enable validation
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
@@ -30,6 +34,7 @@ async function bootstrap() {
   console.log(`Ouija Virtual Backend running on port ${port}`);
   console.log(`CORS enabled for: ${corsOrigins.join(', ')}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Endpoint: POST http://localhost:` + port + `/ouija/ask`);
 }
 
 void bootstrap();
