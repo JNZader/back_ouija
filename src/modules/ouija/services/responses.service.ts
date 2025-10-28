@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Language, Personality } from '../enums';
 import { NormalizerService } from './normalizer.service';
+import { DatabaseException } from '../../../common/exceptions/types/database.exception';
 
 const SESSION_TTL = 1000 * 60 * 60; // 1 hora
 const CLEANUP_INTERVAL = 1000 * 60 * 10; // 10 minutos
@@ -69,7 +70,7 @@ export class ResponsesService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly normalizer: NormalizerService
+    private readonly normalizer: NormalizerService,
   ) {
     this.logger.log('Responses service inicializado');
 
@@ -108,20 +109,33 @@ export class ResponsesService {
     this.totalRequests++;
     this.logger.log(`Buscando respuesta para: ${personality}/${language}/${category}`);
 
-    const responses = await this.prisma.fallbackResponse.findMany({
-      where: {
+    let responses;
+
+    try {
+      responses = await this.prisma.fallbackResponse.findMany({
+        where: {
+          personality,
+          language,
+          category,
+        },
+        include: {
+          keywords: {
+            include: {
+              keyword: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      // Lanzar DatabaseException con contexto completo
+      throw new DatabaseException('getResponse', error instanceof Error ? error : new Error(String(error)), {
+        userId,
         personality,
         language,
         category,
-      },
-      include: {
-        keywords: {
-          include: {
-            keyword: true,
-          },
-        },
-      },
-    });
+        operation: 'fallbackResponse.findMany',
+      });
+    }
 
     /**
      * si no hay respuestas retorna error
@@ -239,7 +253,6 @@ export class ResponsesService {
   }
 
   private calculateMatchScore(question: string, responseKeywords: string[]): { score: number; matched: string[] } {
-
     const normalizedQuestion = this.normalizer.normalize(question);
 
     const questionWords = normalizedQuestion.split(' ');
@@ -388,21 +401,31 @@ export class ResponsesService {
   }
 
   async getStats(): Promise<Stats> {
-    const [total, byPersonality, byCategory, byLanguage] = await Promise.all([
-      this.prisma.fallbackResponse.count(),
-      this.prisma.fallbackResponse.groupBy({
-        by: ['personality'],
-        _count: true,
-      }),
-      this.prisma.fallbackResponse.groupBy({
-        by: ['category'],
-        _count: true,
-      }),
-      this.prisma.fallbackResponse.groupBy({
-        by: ['language'],
-        _count: true,
-      }),
-    ]);
+    let total, byPersonality, byCategory, byLanguage;
+
+    try {
+      [total, byPersonality, byCategory, byLanguage] = await Promise.all([
+        this.prisma.fallbackResponse.count(),
+        this.prisma.fallbackResponse.groupBy({
+          by: ['personality'],
+          _count: true,
+        }),
+        this.prisma.fallbackResponse.groupBy({
+          by: ['category'],
+          _count: true,
+        }),
+        this.prisma.fallbackResponse.groupBy({
+          by: ['language'],
+          _count: true,
+        }),
+      ]);
+    } catch (error) {
+      // Lanzar DatabaseException con contexto
+      throw new DatabaseException('getStats', error instanceof Error ? error : new Error(String(error)), {
+        operation: 'fallbackResponse.count/groupBy',
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     const activeSessions = this.userHistory.size;
     const avgResponsesPerSession =
