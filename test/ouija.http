@@ -223,3 +223,22 @@ GET {{baseUrl}}/ouija/responses/sessions
 ###   - totalRequests >= 4 (por los tests de preparación)
 
 GET {{baseUrl}}/ouija/responses/stats
+
+# ==================================================================
+# HEALTH CHECK TESTS
+# ==================================================================
+
+### Health Check 1: Liveness (app + database)
+# Kubernetes livenessProbe - Verifica si la app está viva
+# Incluye: app (version, uptime, environment) + database (responseTime)
+GET {{baseUrl}}/health
+
+### Health Check 2: Readiness (database + memory)
+# Kubernetes readinessProbe - Verifica si puede recibir tráfico
+# Incluye: database + memory_heap (150MB) + memory_rss (300MB)
+GET {{baseUrl}}/health/ready
+
+### Health Check 3: Detailed (todo)
+# Monitoreo completo: app + database + memory + disk (90%)
+GET {{baseUrl}}/health/detailed
+
