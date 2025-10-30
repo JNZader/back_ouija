@@ -1,0 +1,445 @@
+# ==================================================================
+# OUIJA - TESTS DE IDIOMAS
+# ==================================================================
+# Pruebas de soporte multiidioma (español e inglés)
+
+@baseUrl = http://localhost:3001
+@sessionId = languages-test-{{$timestamp}}
+
+# ==================================================================
+# Español (ES) - Tests Completos
+# ==================================================================
+
+### Test 1a: Español - Pregunta sobre amor
+# Verifica:
+#   - language: "es"
+#   - Respuesta en español
+#   - Keywords en español: amor, pareja, etc.
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-es-love
+
+{
+  "question": "¿Encontraré el amor de mi vida?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1b: Español - Pregunta sobre carrera
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-es-career
+
+{
+  "question": "¿Tendré éxito en mi trabajo?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1c: Español - Pregunta sobre salud
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-es-health
+
+{
+  "question": "¿Mejoraré de mi enfermedad?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1d: Español - Pregunta sobre familia
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-es-family
+
+{
+  "question": "¿Cómo está mi familia?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Inglés (EN) - Tests Completos
+# ==================================================================
+
+### Test 2a: Inglés - Pregunta sobre amor
+# Verifica:
+#   - language: "en"
+#   - Respuesta en inglés
+#   - Keywords en inglés: love, relationship, etc.
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-en-love
+
+{
+  "question": "Will I find true love?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+### Test 2b: Inglés - Pregunta sobre carrera
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-en-career
+
+{
+  "question": "Will I be successful in my career?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+### Test 2c: Inglés - Pregunta sobre salud
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-en-health
+
+{
+  "question": "Will my health improve?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+### Test 2d: Inglés - Pregunta sobre familia
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-en-family
+
+{
+  "question": "How is my family doing?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Tests de Clasificación Bilingüe
+# ==================================================================
+
+### Test 3a: Clasificación ES - Amor
+# Verifica:
+#   - category: "love"
+#   - Keywords en español detectadas correctamente
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-classify-es
+
+{
+  "question": "Mi pareja y yo tenemos problemas de amor",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 3b: Clasificación EN - Amor
+# Verifica:
+#   - category: "love"
+#   - Keywords en inglés detectadas correctamente
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-classify-en
+
+{
+  "question": "My partner and I have relationship issues",
+  "personality": "cryptic",
+  "language": "en"
+}
+
+
+### Test 3c: Clasificación ES - Trabajo
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-classify-es
+
+{
+  "question": "Mi jefe me dará un ascenso en mi carrera",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 3d: Clasificación EN - Trabajo
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-classify-en
+
+{
+  "question": "My boss will give me a promotion in my career",
+  "personality": "cryptic",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Tests de Personalidades en Diferentes Idiomas
+# ==================================================================
+
+### Test 4a: WISE en español
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-wise-es
+
+{
+  "question": "¿Qué debo hacer?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 4b: WISE en inglés
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-wise-en
+
+{
+  "question": "What should I do?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+### Test 4c: CRYPTIC en español
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-cryptic-es
+
+{
+  "question": "¿Cuál es mi destino?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 4d: CRYPTIC en inglés
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-cryptic-en
+
+{
+  "question": "What is my destiny?",
+  "personality": "cryptic",
+  "language": "en"
+}
+
+
+### Test 4e: DARK en español
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-dark-es
+
+{
+  "question": "¿Estoy en peligro?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+### Test 4f: DARK en inglés
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-dark-en
+
+{
+  "question": "Am I in danger?",
+  "personality": "dark",
+  "language": "en"
+}
+
+
+### Test 4g: PLAYFUL en español
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-playful-es
+
+{
+  "question": "¿Qué tal tu día?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+### Test 4h: PLAYFUL en inglés
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-playful-en
+
+{
+  "question": "How's your day?",
+  "personality": "playful",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Tests de Idioma por Defecto
+# ==================================================================
+
+### Test 5: Sin especificar idioma - Debe usar por defecto
+# Verifica:
+#   - language: valor por defecto (probablemente "es")
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-default-lang
+
+{
+  "question": "¿Qué idioma usarás?"
+}
+
+
+# ==================================================================
+# Tests de Normalización Multiidioma
+# ==================================================================
+
+### Test 6a: Normalización ES - Acentos y mayúsculas
+# Verifica:
+#   - Keywords normalizadas correctamente
+#   - Acentos removidos para matching
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-normalize-es
+
+{
+  "question": "¿ENCONTRARÉ el AMOR de mi VIDA con PAREJA?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 6b: Normalización EN - Mayúsculas
+# Verifica:
+#   - Keywords normalizadas correctamente
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-normalize-en
+
+{
+  "question": "WILL I FIND TRUE LOVE with MY PARTNER?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Tests de Fallback por Idioma
+# ==================================================================
+
+### Test 7a: Fallback ES - Categoría sin respuestas
+# Nota: Este test puede fallar al fallback si no hay respuestas
+# seeded para cierta combinación de personality-language-category
+# Verifica:
+#   - Cascada a GENERAL si no hay respuestas específicas
+#   - metadata.cascadeFrom presente si hizo fallback
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-fallback-es
+
+{
+  "question": "pregunta muy específica sin keywords",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 7b: Fallback EN - Categoría sin respuestas
+# Nota: English tiene menos respuestas seeded
+# Verifica:
+#   - Cascada a GENERAL o respuesta genérica hardcoded
+#   - method puede ser "fallback-general"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-fallback-en
+
+{
+  "question": "very specific question without keywords",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Tests de Sesiones Independientes por Idioma
+# ==================================================================
+
+### Test 8a: Sesión ES - Primera pregunta
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-lang-session
+
+{
+  "question": "¿Encontraré el amor?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 8b: Sesión EN - Primera pregunta (misma sesión)
+# Verifica:
+#   - Las respuestas en ES no afectan las respuestas en EN
+#   - availableResponses independiente por idioma
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-lang-session
+
+{
+  "question": "Will I find love?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+### Test 8c: Sesión ES - Segunda pregunta
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-lang-session
+
+{
+  "question": "¿Encontraré el amor?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 8d: Sesión EN - Segunda pregunta
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-lang-session
+
+{
+  "question": "Will I find love?",
+  "personality": "wise",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Tests de Coverage de Seed Data
+# ==================================================================
+
+### Test 9: Verificar distribución de respuestas por idioma
+# Endpoint: GET /ouija/responses/stats
+# Verifica:
+#   - database.byLanguage debe mostrar:
+#     - es: ~60+ respuestas
+#     - en: ~2-3 respuestas (según CLAUDE.md)
+#   - Importante: Inglés tiene menos cobertura
+GET {{baseUrl}}/ouija/responses/stats
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ Respuestas deben estar en el idioma especificado
+# ✅ Keywords deben matchearse en el idioma correcto
+# ✅ Clasificación debe funcionar en ambos idiomas
+# ✅ Normalización debe remover acentos y convertir a minúsculas
+# ✅ Sesiones independientes por idioma
+# ✅ Fallback a GENERAL o genérico si no hay respuestas
+# ⚠️  IMPORTANTE: English tiene menos respuestas seeded (ver CLAUDE.md)
+# ⚠️  Puede haber más fallbacks en inglés debido a falta de seed data
+# ✅ GET /ouija/responses/stats debe mostrar distribución por idioma
