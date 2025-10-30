@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Headers, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Headers, Post } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OuijaQuestionDto } from './dto/ouija-question.dto';
 import { OuijaResponseDto } from './dto/ouija-response.dto';
@@ -52,7 +52,8 @@ export class OuijaController {
           summary: 'SessionId inválido',
           value: {
             statusCode: 400,
-            message: 'SessionId inválido. Solo se permiten caracteres alfanuméricos, guiones y guiones bajos (max 100 caracteres)',
+            message:
+              'SessionId inválido. Solo se permiten caracteres alfanuméricos, guiones y guiones bajos (max 100 caracteres)',
             error: 'Bad Request',
           },
         },
@@ -65,36 +66,27 @@ export class OuijaController {
     schema: {
       example: {
         statusCode: 500,
-        message: 'Error generating response',
-        error: 'Database connection failed',
+        timestamp: '2025-10-30T12:30:00.000Z',
+        path: '/ouija/ask',
+        error: 'InternalServerError',
+        message: 'An unexpected error occurred.',
+        details: {
+          originalError: 'Database connection failed',
+        },
+        suggestion: 'An unexpected error occurred. Please try again later.',
       },
     },
   })
   async ask(@Body() dto: OuijaQuestionDto, @Headers('x-session-id') sessionId?: string) {
     // Validar y sanitizar sessionId
-    if (sessionId) {
-      // Solo alfanumérico, guiones y guiones bajos, max 100 chars
-      if (!/^[a-zA-Z0-9_-]{1,100}$/.test(sessionId)) {
-        throw new BadRequestException(
-          'SessionId inválido. Solo se permiten caracteres alfanuméricos, guiones y guiones bajos (max 100 caracteres)',
-        );
-      }
-    }
-
-    try {
-      const userId = sessionId || `temp-${Date.now()}`;
-
-      return await this.ouijaService.processQuestion(dto, userId);
-    } catch (error) {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'Error generating response',
-          error: error.message,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+    if (sessionId && !/^[a-zA-Z0-9_-]{1,100}$/.test(sessionId)) {
+      throw new BadRequestException(
+        'SessionId inválido. Solo se permiten caracteres alfanuméricos, guiones y guiones bajos (max 100 caracteres)',
       );
     }
+
+    const userId = sessionId || `temp-${Date.now()}`;
+    return await this.ouijaService.processQuestion(dto, userId);
   }
 
   @Get('responses/sessions')
