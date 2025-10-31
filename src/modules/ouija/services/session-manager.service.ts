@@ -16,8 +16,8 @@ import type { UserSession, PersonalityMemory } from '../types';
 export class SessionManagerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(SessionManagerService.name);
 
-  private userHistory = new Map<string, UserSession>();
-  private lastPersonalityUsed = new Map<string, PersonalityMemory>();
+  private readonly userHistory = new Map<string, UserSession>();
+  private readonly lastPersonalityUsed = new Map<string, PersonalityMemory>();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   onModuleInit() {
@@ -41,14 +41,14 @@ export class SessionManagerService implements OnModuleInit, OnModuleDestroy {
   getUserSession(userId: string): UserSession {
     let userSession = this.userHistory.get(userId);
 
-    if (!userSession) {
+    if (userSession) {
+      userSession.lastAccess = Date.now();
+    } else {
       userSession = {
         usedResponses: new Set<number>(),
         lastAccess: Date.now(),
       };
       this.userHistory.set(userId, userSession);
-    } else {
-      userSession.lastAccess = Date.now();
     }
 
     return userSession;
@@ -139,7 +139,7 @@ export class SessionManagerService implements OnModuleInit, OnModuleDestroy {
       maxAllowed: MAX_SESSIONS,
       ttl: `${SESSION_TTL / 1000 / 60} minutos`,
       memoryUsage: `${memoryKB} KB`,
-      avgResponsesPerSession: parseFloat(avgResponsesPerSession.toFixed(2)),
+      avgResponsesPerSession: Number.parseFloat(avgResponsesPerSession.toFixed(2)),
     };
   }
 

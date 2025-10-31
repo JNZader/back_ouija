@@ -8,6 +8,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ThrottlerException } from '@nestjs/throttler';
 import { AppException, ErrorResponse } from '../exceptions/base/app-exception.base';
 
 @Catch()
@@ -15,6 +16,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
+    // Ignorar ThrottlerException ya que tiene su propio filtro
+    if (exception instanceof ThrottlerException) {
+      throw exception;
+    }
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -34,12 +40,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // CASO 1: AppException (nuestras excepciones personalizadas)
     // ===========================================================
     if (exception instanceof AppException) {
-      return {
+      const errorResponse: ErrorResponse = {
         ...exception.toJSON(),
         timestamp,
         path,
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
+
+      this.addStackTraceIfNeeded(errorResponse, exception);
+      return errorResponse;
     }
 
     // ====================================================
@@ -56,7 +64,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      return {
+      const errorResponse: ErrorResponse = {
         statusCode: status,
         timestamp,
         path,
@@ -66,12 +74,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
             ? exceptionResponse
             : (exceptionResponse as any).message || exception.message,
         details: typeof exceptionResponse === 'object' ? (exceptionResponse as any) : undefined,
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
+
+      this.addStackTraceIfNeeded(errorResponse, exception);
+      return errorResponse;
     }
 
+    // ========================================
+    // CASO 4: Errores genéricos de JavaScript
+    // ========================================
     if (exception instanceof Error) {
-      return {
+      const errorResponse: ErrorResponse = {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         timestamp,
         path,
@@ -81,10 +94,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
           originalError: exception.message,
         },
         suggestion: 'An unexpected error occurred. Please try again later.',
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
+
+      this.addStackTraceIfNeeded(errorResponse, exception);
+      return errorResponse;
     }
 
+    // ========================================
+    // CASO 5: Errores desconocidos (no Error)
+    // ========================================
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       timestamp,
@@ -93,6 +111,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message: 'An unknown error occurred.',
       suggestion: 'Please contact support if the problem persists.',
     };
+  }
+
+  private addStackTraceIfNeeded(errorResponse: ErrorResponse, exception: unknown): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (!isProduction && exception instanceof Error) {
+      (errorResponse as any).stack = exception.stack;
+    }
   }
 
   private formatValidationError(exception: BadRequestException, timestamp: string, path: string): ErrorResponse {
@@ -104,8 +130,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Construir details estructurados
     const details: Record<string, any> = {};
 
-    validationMessages.forEach((msg: string) => {
-      const fieldMatch = msg.match(/^(\w+)\s/);
+    for (const msg of validationMessages) {
+      const fieldMatch = /^(\w+)\s/.exec(msg);
       const field = fieldMatch ? fieldMatch[1] : 'unknown';
 
       if (!details[field]) {
@@ -114,7 +140,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       const cleanMessage = msg.replace(/^(\w+)\s/, '');
       details[field].push(cleanMessage);
-    });
+    }
 
     const fields = Object.keys(details);
     const message =
@@ -138,13 +164,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private logError(exception: unknown, request: Request, errorResponse: ErrorResponse) {
     const { method, url, body, headers, ip } = request;
 
-    const isOperational =
-      exception instanceof AppException
-        ? exception.isOperational
-        : exception instanceof BadRequestException
-          ? true
-          : false;
-
+    const isOperational = this.determineIfOperational(exception);
     const logLevel = isOperational ? 'warn' : 'error';
 
     const logMessage = {
@@ -164,5 +184,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else {
       this.logger.warn(JSON.stringify(logMessage));
     }
+  }
+
+  private determineIfOperational(exception: unknown): boolean {
+    if (exception instanceof AppException) {
+      return exception.isOperational;
+    }
+
+    if (exception instanceof BadRequestException) {
+      return true;
+    }
+
+    return false;
   }
 }

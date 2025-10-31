@@ -20,9 +20,9 @@ import type { Result, Stats } from '../types';
 export class ResponsesService {
   private readonly logger = new Logger(ResponsesService.name);
 
-  private startTime = Date.now();
+  private readonly startTime = Date.now();
   private totalRequests = 0;
-  private fallbackStats = {
+  private readonly fallbackStats = {
     categoryToGeneral: 0,
     genericResponses: 0,
   };
