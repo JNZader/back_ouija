@@ -26,7 +26,7 @@ export class ThrottlerExceptionFilter implements ExceptionFilter {
       origin: request.headers['origin'] || 'unknown',
       rateLimit: {
         limit: rateLimit,
-        windowSeconds: rateLimitTTL ? Math.ceil(parseInt(rateLimitTTL, 10) / 1000) : 'unknown',
+        windowSeconds: rateLimitTTL ? Math.ceil(Number.parseInt(rateLimitTTL, 10) / 1000) : 'unknown',
         retryAfter: `${retryAfter} seconds`,
       },
       timestamp,
@@ -43,7 +43,7 @@ export class ThrottlerExceptionFilter implements ExceptionFilter {
       details: {
         retryAfter: `${retryAfter} seconds`,
         limit: rateLimit,
-        windowSeconds: rateLimitTTL ? Math.ceil(parseInt(rateLimitTTL, 10) / 1000) : undefined,
+        windowSeconds: rateLimitTTL ? Math.ceil(Number.parseInt(rateLimitTTL, 10) / 1000) : undefined,
       },
       suggestion: `Please wait for ${retryAfter} seconds before making new requests.`,
     });

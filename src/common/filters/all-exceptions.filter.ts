@@ -36,8 +36,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
     const path = request.url;
 
-    const isProduction = process.env.NODE_ENV === 'production';
-
     // ===========================================================
     // CASO 1: AppException (nuestras excepciones personalizadas)
     // ===========================================================
@@ -48,10 +46,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         path,
       };
 
-      if (!isProduction && exception instanceof Error) {
-        (errorResponse as any).stack = exception.stack;
-      }
-
+      this.addStackTraceIfNeeded(errorResponse, exception);
       return errorResponse;
     }
 
@@ -81,10 +76,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         details: typeof exceptionResponse === 'object' ? (exceptionResponse as any) : undefined,
       };
 
-      if (!isProduction && exception instanceof Error) {
-        (errorResponse as any).stack = exception.stack;
-      }
-
+      this.addStackTraceIfNeeded(errorResponse, exception);
       return errorResponse;
     }
 
@@ -104,10 +96,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         suggestion: 'An unexpected error occurred. Please try again later.',
       };
 
-      if (!isProduction) {
-        (errorResponse as any).stack = exception.stack;
-      }
-
+      this.addStackTraceIfNeeded(errorResponse, exception);
       return errorResponse;
     }
 
@@ -124,6 +113,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
   }
 
+  private addStackTraceIfNeeded(errorResponse: ErrorResponse, exception: unknown): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    if (!isProduction && exception instanceof Error) {
+      (errorResponse as any).stack = exception.stack;
+    }
+  }
+
   private formatValidationError(exception: BadRequestException, timestamp: string, path: string): ErrorResponse {
     const exceptionResponse = exception.getResponse() as any;
     const validationMessages = Array.isArray(exceptionResponse.message)
@@ -133,8 +130,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Construir details estructurados
     const details: Record<string, any> = {};
 
-    validationMessages.forEach((msg: string) => {
-      const fieldMatch = msg.match(/^(\w+)\s/);
+    for (const msg of validationMessages) {
+      const fieldMatch = /^(\w+)\s/.exec(msg);
       const field = fieldMatch ? fieldMatch[1] : 'unknown';
 
       if (!details[field]) {
@@ -143,7 +140,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       const cleanMessage = msg.replace(/^(\w+)\s/, '');
       details[field].push(cleanMessage);
-    });
+    }
 
     const fields = Object.keys(details);
     const message =
@@ -167,13 +164,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private logError(exception: unknown, request: Request, errorResponse: ErrorResponse) {
     const { method, url, body, headers, ip } = request;
 
-    const isOperational =
-      exception instanceof AppException
-        ? exception.isOperational
-        : exception instanceof BadRequestException
-          ? true
-          : false;
-
+    const isOperational = this.determineIfOperational(exception);
     const logLevel = isOperational ? 'warn' : 'error';
 
     const logMessage = {
@@ -193,5 +184,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else {
       this.logger.warn(JSON.stringify(logMessage));
     }
+  }
+
+  private determineIfOperational(exception: unknown): boolean {
+    if (exception instanceof AppException) {
+      return exception.isOperational;
+    }
+
+    if (exception instanceof BadRequestException) {
+      return true;
+    }
+
+    return false;
   }
 }

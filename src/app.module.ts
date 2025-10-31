@@ -19,18 +19,18 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     ThrottlerModule.forRoot([
       {
         name: 'short',
-        ttl: parseInt(process.env.THROTTLE_SHORT_TTL || '1000', 10),
-        limit: parseInt(process.env.THROTTLE_SHORT_LIMIT || '3', 10),
+        ttl: Number.parseInt(process.env.THROTTLE_SHORT_TTL || '1000', 10),
+        limit: Number.parseInt(process.env.THROTTLE_SHORT_LIMIT || '3', 10),
       },
       {
         name: 'medium',
-        ttl: parseInt(process.env.THROTTLE_MEDIUM_TTL || '10000', 10),
-        limit: parseInt(process.env.THROTTLE_MEDIUM_LIMIT || '20', 10),
+        ttl: Number.parseInt(process.env.THROTTLE_MEDIUM_TTL || '10000', 10),
+        limit: Number.parseInt(process.env.THROTTLE_MEDIUM_LIMIT || '20', 10),
       },
       {
         name: 'long',
-        ttl: parseInt(process.env.THROTTLE_LONG_TTL || '60000', 10),
-        limit: parseInt(process.env.THROTTLE_LONG_LIMIT || '100', 10),
+        ttl: Number.parseInt(process.env.THROTTLE_LONG_TTL || '60000', 10),
+        limit: Number.parseInt(process.env.THROTTLE_LONG_LIMIT || '100', 10),
       },
     ]),
     OuijaModule,

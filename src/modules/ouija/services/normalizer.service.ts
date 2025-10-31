@@ -69,7 +69,7 @@ export class NormalizerService {
 
     normalized = normalized.toLowerCase();
 
-    normalized = normalized.replace(/[¿?¡!.,;:()"'[\]{}]/g, ' ');
+    normalized = normalized.replaceAll(/[¿?¡!.,;:()"'[\]{}]/g, ' ');
 
     normalized = this.removeDiacritics(normalized);
 
@@ -79,12 +79,12 @@ export class NormalizerService {
 
     normalized = filteredWords.join(' ');
 
-    normalized = normalized.trim().replace(/\s+/g, ' ');
+    normalized = normalized.trim().replaceAll(/\s+/g, ' ');
 
     return normalized;
   }
 
   private removeDiacritics(text: string): string {
-    return text.normalize('NFD').replace(/[\u0300-\u0302\u0304-\u036f]/g, '');
+    return text.normalize('NFD').replaceAll(/[\u0300-\u0302\u0304-\u036f]/g, '');
   }
 }

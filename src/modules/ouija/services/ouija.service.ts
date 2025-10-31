@@ -9,8 +9,8 @@ export class OuijaService {
   private readonly logger = new Logger(OuijaService.name);
 
   constructor(
-    private responses: ResponsesService,
-    private classifier: ClasifierService,
+    private readonly responses: ResponsesService,
+    private readonly classifier: ClasifierService,
   ) {}
 
   async processQuestion(dto: OuijaQuestionDto, userId: string) {
