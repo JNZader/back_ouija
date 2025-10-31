@@ -37,6 +37,21 @@ async function bootstrap() {
   const corsOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
     : ['http://localhost:3000'];
+
+  for (const origin of corsOrigins) {
+    try {
+      const url = new URL(origin);
+
+      if (!['http:', 'https:'].includes(url.protocol)) {
+        throw new Error(`Protocolo invalido: ${url.protocol}`);
+      }
+    } catch (err) {
+      console.error(`Origen CORS invalido: ${origin}`);
+      console.error(`Error: ${err.message}`);
+      process.exit(1);
+    }
+  }
+
   app.enableCors({ origin: corsOrigins, credentials: true });
 
   app.useGlobalFilters(new AllExceptionsFilter());
@@ -72,6 +87,7 @@ async function bootstrap() {
 
   console.log(`Backend: http://localhost:${port}`);
   console.log(`Swagger: http://localhost:${port}/api`);
+  console.log(`CORS origins validados: ${corsOrigins.join(', ')}`);
 }
 
 void bootstrap();
