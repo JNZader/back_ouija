@@ -3,6 +3,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { ThrottlerExceptionFilter } from './common/filters/throttler-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as path from 'path';
 import * as express from 'express';
@@ -54,7 +55,7 @@ async function bootstrap() {
 
   app.enableCors({ origin: corsOrigins, credentials: true });
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(), new ThrottlerExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
 
   // Swagger

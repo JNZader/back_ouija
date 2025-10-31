@@ -8,6 +8,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ThrottlerException } from '@nestjs/throttler';
 import { AppException, ErrorResponse } from '../exceptions/base/app-exception.base';
 
 @Catch()
@@ -15,6 +16,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
+    // Ignorar ThrottlerException ya que tiene su propio filtro
+    if (exception instanceof ThrottlerException) {
+      throw exception;
+    }
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
