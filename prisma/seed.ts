@@ -8,6 +8,7 @@ import { DEATH_RESPONSES } from './seed/data/death.seed';
 import { FAMILY_RESPONSES } from './seed/data/family.seed';
 import { FUTURE_RESPONSES } from './seed/data/future.seed';
 import { GENERAL_RESPONSES } from './seed/data/general.seed';
+import { GREETING_RESPONSES } from './seed/data/greeting.seed';
 import { HEALTH_RESPONSES } from './seed/data/health.seed';
 import { LOVE_RESPONSES } from './seed/data/love.seed';
 import { MONEY_RESPONSES } from './seed/data/money.seed';
@@ -28,6 +29,7 @@ async function main() {
     { category: Category.FAMILY, data: FAMILY_RESPONSES },
     { category: Category.FUTURE, data: FUTURE_RESPONSES },
     { category: Category.GENERAL, data: GENERAL_RESPONSES },
+    { category: Category.GENERAL, data: GREETING_RESPONSES }, // Respuestas de saludo
     { category: Category.HEALTH, data: HEALTH_RESPONSES },
     { category: Category.LOVE, data: LOVE_RESPONSES },
     { category: Category.MONEY, data: MONEY_RESPONSES },
