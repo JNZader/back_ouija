@@ -1,0 +1,143 @@
+# ==================================================================
+# OUIJA - TESTS BÁSICOS
+# ==================================================================
+# Pruebas fundamentales del endpoint /ouija/ask
+
+@baseUrl = http://localhost:3001
+@sessionId = basic-test-{{$timestamp}}
+
+# ==================================================================
+# Test Básico
+# ==================================================================
+### Test 1: Pregunta básica sin parámetros opcionales
+# Endpoint: POST /ouija/ask
+# Verifica:
+#   - Status: 201 Created
+#   - Respuesta contiene: response, personality, language, category
+#   - personality y language toman valores por defecto
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Funcionará esta API?"
+}
+
+
+# ==================================================================
+# Tests con Parámetros Completos
+# ==================================================================
+### Test 2: Pregunta con personality y language especificados
+# Verifica:
+#   - personality = "wise"
+#   - language = "es"
+#   - Respuesta en español
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-complete
+
+{
+  "question": "¿Qué me depara el futuro?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Tests de Keyword Matching
+# ==================================================================
+### Test 3: Pregunta con palabras clave (amor)
+# Verifica:
+#   - method: "keyword-match"
+#   - matchScore > 0
+#   - matchedKeywords contiene palabras como "amor", "pareja"
+#   - category: "love"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-keywords
+
+{
+  "question": "¿Encontraré el amor de mi vida este año?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 4: Pregunta con palabras clave (trabajo)
+# Verifica:
+#   - method: "keyword-match"
+#   - matchScore > 0
+#   - matchedKeywords contiene palabras como "trabajo", "empleo"
+#   - category: "career"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-keywords
+
+{
+  "question": "¿Me ascenderán en mi trabajo este mes?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Selección Aleatoria
+# ==================================================================
+### Test 5: Pregunta genérica sin keywords específicas
+# Verifica:
+#   - method: "random"
+#   - matchScore: 0
+#   - matchedKeywords: undefined o []
+#   - category: "general"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-random
+
+{
+  "question": "Hola espíritu, ¿estás ahí?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Scoring
+# ==================================================================
+### Test 6a: Coincidencia EXACTA de palabras
+# Verifica:
+#   - matchScore alto (2 puntos por palabra exacta)
+#   - matchedKeywords lista todas las coincidencias exactas
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-scoring-exact
+
+{
+  "question": "amor pareja corazón",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 6b: Coincidencia PARCIAL de palabras (substring)
+# Verifica:
+#   - matchScore más bajo (1 punto por palabra parcial)
+#   - matchedKeywords lista coincidencias parciales
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-scoring-partial
+
+{
+  "question": "enamorado trabajando enfermito",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ Todas las respuestas deben tener status 201 Created
+# ✅ Todas deben incluir: response, personality, language, category, metadata
+# ✅ metadata debe incluir: method, matchScore, totalResponses, availableResponses
+# ✅ matchScore debe ser >= 0
+# ✅ method puede ser: "keyword-match", "random", "fallback-general"

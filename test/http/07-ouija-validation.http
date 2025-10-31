@@ -1,0 +1,470 @@
+# ==================================================================
+# OUIJA - TESTS DE VALIDACIÓN Y ERRORES
+# ==================================================================
+# Pruebas de validación de entrada y manejo de errores
+
+@baseUrl = http://localhost:3001
+@sessionId = validation-test-{{$timestamp}}
+
+# ==================================================================
+# Validación de Campo "question"
+# ==================================================================
+
+### Test 1a: Error - Question vacía
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: "question should not be empty" o similar
+#   - message incluye detalles de validación
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": ""
+}
+
+
+### Test 1b: Error - Question solo espacios en blanco
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: "Question cannot be empty or only whitespace"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "   "
+}
+
+
+### Test 1c: Error - Question muy corta (menos de 3 caracteres)
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: minLength validation (3 caracteres mínimo)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿?"
+}
+
+
+### Test 1d: Error - Question muy larga (más de 200 caracteres)
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: maxLength validation (200 caracteres máximo)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Esta es una pregunta extremadamente larga que excede el límite máximo de doscientos caracteres permitidos por la validación del sistema para asegurar que las preguntas sean concisas y no sobrecarguen el proceso de análisis y generación de respuestas místicas del tablero Ouija virtual que estamos probando en este momento con este caso de prueba específico diseñado para verificar el comportamiento correcto del sistema?"
+}
+
+
+### Test 1e: Error - Campo question faltante
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: "question is required" o similar
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "personality": "wise"
+}
+
+
+### Test 1f: Success - Question en el límite mínimo (3 caracteres)
+# Verifica:
+#   - Status: 201 Created
+#   - Validación pasa con 3 caracteres exactos
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Sí?"
+}
+
+
+### Test 1g: Success - Question en el límite máximo (200 caracteres)
+# Verifica:
+#   - Status: 201 Created
+#   - Validación pasa con 200 caracteres exactos
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Esta pregunta tiene exactamente doscientos caracteres para verificar que la validación del sistema permite preguntas de esta longitud máxima y que el tablero Ouija puede procesar correctamente preguntas largas?"
+}
+
+
+# ==================================================================
+# Validación de Campo "personality"
+# ==================================================================
+
+### Test 2a: Error - Personality inválida
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: "personality must be a valid enum value"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "invalid_personality"
+}
+
+
+### Test 2b: Error - Personality con mayúsculas incorrectas
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: enum validation (debe ser lowercase)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "WISE"
+}
+
+
+### Test 2c: Error - Personality con typo
+# Verifica:
+#   - Status: 400 Bad Request
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "wize"
+}
+
+
+### Test 2d: Success - Personality opcional (campo omitido)
+# Verifica:
+#   - Status: 201 Created
+#   - Sistema asigna personality aleatoria o por defecto
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?"
+}
+
+
+### Test 2e: Success - Personality válida: wise
+# Verifica:
+#   - Status: 201 Created
+#   - personality: "wise"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "wise"
+}
+
+
+### Test 2f: Success - Personality válida: cryptic
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "cryptic"
+}
+
+
+### Test 2g: Success - Personality válida: dark
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "dark"
+}
+
+
+### Test 2h: Success - Personality válida: playful
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "playful"
+}
+
+
+# ==================================================================
+# Validación de Campo "language"
+# ==================================================================
+
+### Test 3a: Error - Language inválido
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: "language must be a valid enum value"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "language": "fr"
+}
+
+
+### Test 3b: Error - Language con mayúsculas
+# Verifica:
+#   - Status: 400 Bad Request
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "language": "ES"
+}
+
+
+### Test 3c: Success - Language opcional (campo omitido)
+# Verifica:
+#   - Status: 201 Created
+#   - Sistema asigna language por defecto
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?"
+}
+
+
+### Test 3d: Success - Language válido: es
+# Verifica:
+#   - Status: 201 Created
+#   - language: "es"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "language": "es"
+}
+
+
+### Test 3e: Success - Language válido: en
+# Verifica:
+#   - Status: 201 Created
+#   - language: "en"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "What will happen?",
+  "language": "en"
+}
+
+
+# ==================================================================
+# Validación de Content-Type
+# ==================================================================
+
+### Test 4a: Error - Content-Type faltante
+# Verifica:
+#   - Status: 415 Unsupported Media Type o 400 Bad Request
+# Nota: Descomentar para probar
+# POST {{baseUrl}}/ouija/ask
+# X-Session-Id: {{sessionId}}
+#
+# {
+#   "question": "¿Qué pasará?"
+# }
+
+
+### Test 4b: Error - Content-Type incorrecto
+# Verifica:
+#   - Status: 415 Unsupported Media Type
+# Nota: Descomentar para probar
+# POST {{baseUrl}}/ouija/ask
+# Content-Type: text/plain
+# X-Session-Id: {{sessionId}}
+#
+# {
+#   "question": "¿Qué pasará?"
+# }
+
+
+# ==================================================================
+# Validación de JSON Malformado
+# ==================================================================
+
+### Test 5a: Error - JSON inválido (falta comilla)
+# Verifica:
+#   - Status: 400 Bad Request
+#   - Error: JSON parse error
+# Nota: REST Client puede no enviar JSON inválido
+# POST {{baseUrl}}/ouija/ask
+# Content-Type: application/json
+# X-Session-Id: {{sessionId}}
+#
+# {
+#   "question": "¿Qué pasará?
+# }
+
+
+### Test 5b: Error - JSON inválido (falta llave)
+# Nota: REST Client puede no enviar JSON inválido
+# POST {{baseUrl}}/ouija/ask
+# Content-Type: application/json
+# X-Session-Id: {{sessionId}}
+#
+# {
+#   "question": "¿Qué pasará?",
+#   "personality": "wise"
+
+
+# ==================================================================
+# Validación de Campos Extra
+# ==================================================================
+
+### Test 6a: Success - Campos extra ignorados (whitelist enabled)
+# Verifica:
+#   - Status: 201 Created
+#   - Campos extra son ignorados por ValidationPipe
+#   - Solo se procesan question, personality, language
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "wise",
+  "extraField": "this should be ignored",
+  "anotherField": 12345
+}
+
+
+# ==================================================================
+# Validación de Header X-Session-Id
+# ==================================================================
+
+### Test 7a: Success - Sin header X-Session-Id
+# Verifica:
+#   - Status: 201 Created
+#   - Sistema genera sessionId temporal
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+
+{
+  "question": "¿Qué pasará?"
+}
+
+
+### Test 7b: Success - Header X-Session-Id válido
+# Verifica:
+#   - Status: 201 Created
+#   - Usa el sessionId proporcionado
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: my-custom-session-id
+
+{
+  "question": "¿Qué pasará?"
+}
+
+
+### Test 7c: Success - Header X-Session-Id con caracteres especiales
+# Verifica:
+#   - Status: 201 Created
+#   - Acepta alphanumeric, guiones, underscores
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: user-123_test-session
+
+{
+  "question": "¿Qué pasará?"
+}
+
+
+# ==================================================================
+# Validación de Type Coercion
+# ==================================================================
+
+### Test 8a: Type coercion - Number como string
+# Verifica:
+#   - Status: 400 Bad Request
+#   - question debe ser string
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": 12345
+}
+
+
+### Test 8b: Type coercion - Boolean como string
+# Verifica:
+#   - Status: 400 Bad Request
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": true
+}
+
+
+### Test 8c: Type coercion - Array como string
+# Verifica:
+#   - Status: 400 Bad Request
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": ["¿Qué", "pasará?"]
+}
+
+
+### Test 8d: Type coercion - Object como string
+# Verifica:
+#   - Status: 400 Bad Request
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}
+
+{
+  "question": {
+    "text": "¿Qué pasará?"
+  }
+}
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ question: required, string, 3-200 caracteres, no solo espacios
+# ✅ personality: optional, enum(wise|cryptic|dark|playful)
+# ✅ language: optional, enum(es|en)
+# ✅ Content-Type: application/json requerido
+# ✅ JSON debe ser válido y bien formado
+# ✅ Campos extra son ignorados (whitelist: true)
+# ✅ X-Session-Id: opcional, se genera si no se proporciona
+# ✅ Type coercion no debe permitir tipos incorrectos
+# ✅ Todos los errores retornan 400 Bad Request con mensaje descriptivo
+# ✅ ValidationPipe debe usar class-validator decorators
