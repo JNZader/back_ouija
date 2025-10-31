@@ -3,9 +3,11 @@ import { DiskHealthIndicator, HealthCheck, HealthCheckService, MemoryHealthIndic
 import { DatabaseHealthIndicator } from './indicators/database-health.indicator';
 import { AppHealthIndicator } from './indicators/app-health.indicator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('health')
 @Controller('health')
+@SkipThrottle()
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
