@@ -4,10 +4,30 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as path from 'path'; 
+import * as path from 'path';
+import * as express from 'express';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          fontSrc: ["'self'", 'https:'],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
+
+  app.use(express.json({ limit: '10kb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
   const publicPath = path.join(__dirname, '..', '..', 'public');
   app.useStaticAssets(publicPath);
@@ -37,13 +57,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document, {
     customSiteTitle: 'Ouija Virtual API Docs',
     customfavIcon: '/swagger/favicon.ico',
-    customCssUrl: [
-      'https://fonts.googleapis.com/css2?family=Creepster&display=swap',
-      '/swagger/swagger-theme.css'
-    ],
-    customJs: [
-      '/swagger/custom-cursor.js'
-    ],
+    customCssUrl: ['https://fonts.googleapis.com/css2?family=Creepster&display=swap', '/swagger/swagger-theme.css'],
+    customJs: ['/swagger/custom-cursor.js'],
     swaggerOptions: {
       persistAuthorization: true,
       tryItOutEnabled: true,
