@@ -1,0 +1,60 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src"],
+  "entryPointStrategy": "expand",
+  "out": "./public/docs",
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.spec.ts",
+    "**/test/**",
+    "**/dist/**"
+  ],
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "readme": "none",
+  "name": "Ouija Virtual Backend - Documentación Técnica",
+  "includeVersion": true,
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Project",
+    "Module",
+    "Namespace",
+    "Enum",
+    "EnumMember",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Variable",
+    "Function",
+    "Accessor",
+    "Method",
+    "Parameter",
+    "TypeParameter",
+    "TypeLiteral",
+    "CallSignature",
+    "ConstructorSignature",
+    "IndexSignature",
+    "GetSignature",
+    "SetSignature"
+  ],
+  "categorizeByGroup": true,
+  "categoryOrder": ["Controllers", "Services", "DTOs", "Enums", "Configuration", "*"],
+  "navigationLinks": {
+    "API REST (Swagger)": "/api",
+    "GitHub": "https://github.com/JNZader/back_ouija"
+  },
+  "plugin": [],
+  "theme": "default",
+  "lightHighlightTheme": "light-plus",
+  "darkHighlightTheme": "dark-plus",
+  "customCss": "./public/docs-theme.css",
+  "titleLink": "/api",
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true,
+    "includeFolders": true
+  }
+}
