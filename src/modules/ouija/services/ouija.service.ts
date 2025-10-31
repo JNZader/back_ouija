@@ -4,6 +4,22 @@ import { ClasifierService } from './classifier.service';
 import { Language, Personality } from '../enums';
 import { OuijaQuestionDto } from '../dto/ouija-question.dto';
 
+/**
+ * Servicio principal de la tabla Ouija
+ *
+ * @category Services
+ * @description
+ * Coordina el procesamiento de preguntas a través del sistema de respuestas místicas.
+ * Gestiona la selección de personalidades, idiomas y categorías para generar respuestas
+ * contextualizadas basadas en la pregunta del usuario.
+ *
+ * @remarks
+ * Este servicio actúa como orquestador principal, coordinando:
+ * - Clasificación de preguntas
+ * - Gestión de personalidades
+ * - Generación de respuestas
+ * - Tracking de sesiones de usuario
+ */
 @Injectable()
 export class OuijaService {
   private readonly logger = new Logger(OuijaService.name);
@@ -13,6 +29,22 @@ export class OuijaService {
     private readonly classifier: ClasifierService,
   ) {}
 
+  /**
+   * Procesa una pregunta del usuario y genera una respuesta mística
+   *
+   * @param dto - Datos de la pregunta (texto, personalidad opcional, idioma)
+   * @param userId - Identificador único del usuario o sesión
+   * @returns Objeto con la respuesta generada y metadatos del procesamiento
+   *
+   * @example
+   * ```typescript
+   * const response = await ouijaService.processQuestion({
+   *   question: "¿Encontraré el amor?",
+   *   personality: Personality.WISE,
+   *   language: Language.ES
+   * }, "user-123");
+   * ```
+   */
   async processQuestion(dto: OuijaQuestionDto, userId: string) {
     const startTime = Date.now();
 
@@ -62,6 +94,14 @@ export class OuijaService {
     };
   }
 
+  /**
+   * Selecciona una personalidad aleatoria, opcionalmente excluyendo una específica
+   *
+   * @param excludePersonality - Personalidad a excluir de la selección aleatoria
+   * @returns Una personalidad aleatoria del enum Personality
+   *
+   * @internal
+   */
   private getRandomPersonality(excludePersonality?: Personality): Personality {
     let personalities = Object.values(Personality);
 

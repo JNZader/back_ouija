@@ -1,5 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Servicio de normalización de texto
+ *
+ * @category Services
+ * @description
+ * Procesa y normaliza texto para análisis y clasificación de preguntas.
+ * Elimina acentos, stopwords y caracteres especiales para mejorar el matching de keywords.
+ *
+ * @remarks
+ * La normalización incluye:
+ * - Conversión a minúsculas
+ * - Eliminación de puntuación y símbolos
+ * - Eliminación de acentos y diacríticos
+ * - Filtrado de stopwords en español e inglés
+ */
 @Injectable()
 export class NormalizerService {
   private readonly logger = new Logger(NormalizerService.name);
@@ -60,6 +75,18 @@ export class NormalizerService {
     'that',
   ]);
 
+  /**
+   * Normaliza un texto para su análisis
+   *
+   * @param text - Texto a normalizar
+   * @returns Texto normalizado sin acentos, puntuación ni stopwords
+   *
+   * @example
+   * ```typescript
+   * const normalized = normalizer.normalize("¿Cómo está el amor?");
+   * // Returns: "como esta amor"
+   * ```
+   */
   normalize(text: string): string {
     if (!text || text.trim().length === 0) {
       return '';
@@ -84,6 +111,13 @@ export class NormalizerService {
     return normalized;
   }
 
+  /**
+   * Elimina acentos y diacríticos del texto
+   *
+   * @param text - Texto con posibles acentos
+   * @returns Texto sin acentos ni diacríticos
+   * @internal
+   */
   private removeDiacritics(text: string): string {
     return text.normalize('NFD').replaceAll(/[\u0300-\u0302\u0304-\u036f]/g, '');
   }
