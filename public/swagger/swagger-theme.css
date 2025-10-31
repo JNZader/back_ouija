@@ -1473,3 +1473,143 @@ body {
 .swagger-ui .btn:not(:hover) {
   will-change: auto;
 }
+
+/* ========================================
+   BANNER DE NAVEGACIÓN A TYPEDOC
+   ======================================== */
+.typedoc-banner {
+  background: linear-gradient(135deg, rgba(var(--color-borde-primario-rgb), 0.95), rgba(var(--color-borde-secundario-rgb), 0.85));
+  border: 2px solid var(--color-borde-secundario);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-xl);
+  margin: 0 auto var(--space-xl);
+  max-width: 1400px;
+  box-shadow: var(--shadow-elevation-3);
+  animation: slideDown 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.typedoc-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.typedoc-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.typedoc-banner .banner-icon {
+  font-size: 1.8rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.typedoc-banner .banner-text {
+  color: var(--color-fondo-oscuro);
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.typedoc-banner .banner-link {
+  background: var(--color-fondo-oscuro);
+  color: var(--color-borde-secundario);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  border: 2px solid var(--color-fondo-oscuro);
+  transition: all var(--duration-fast) var(--ease-out-quad);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.typedoc-banner .banner-link:hover {
+  background: var(--color-borde-secundario);
+  color: var(--color-fondo-oscuro);
+  border-color: var(--color-borde-secundario);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.typedoc-banner .banner-link:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.typedoc-banner .banner-link:focus-visible {
+  outline: 3px solid var(--color-fondo-oscuro);
+  outline-offset: 2px;
+}
+
+/* Responsive para el banner */
+@media (max-width: 768px) {
+  .typedoc-banner {
+    padding: var(--space-md);
+  }
+
+  .typedoc-banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-sm);
+  }
+
+  .typedoc-banner .banner-text {
+    font-size: 0.95rem;
+  }
+
+  .typedoc-banner .banner-link {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -56,3 +56,40 @@
     cursor.style.opacity = '1';
   });
 })();
+
+// Agregar banner de navegación a TypeDoc
+(function() {
+  'use strict';
+
+  // Esperar a que Swagger UI cargue
+  function addTypedocBanner() {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar) {
+      setTimeout(addTypedocBanner, 100);
+      return;
+    }
+
+    // Crear banner con link a TypeDoc
+    const banner = document.createElement('div');
+    banner.className = 'typedoc-banner';
+    banner.innerHTML = `
+      <div class="typedoc-banner-content">
+        <span class="banner-icon">📚</span>
+        <span class="banner-text">¿Buscas documentación técnica del código?</span>
+        <a href="/docs" target="_blank" class="banner-link">
+          Ver TypeDoc →
+        </a>
+      </div>
+    `;
+
+    // Insertar después del topbar
+    topbar.parentNode.insertBefore(banner, topbar.nextSibling);
+  }
+
+  // Iniciar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addTypedocBanner);
+  } else {
+    addTypedocBanner();
+  }
+})();

@@ -72,7 +72,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 *.tsbuildinfo
 
 # Documentacion temporal
-/docs
+/docss
 cambios.patch
 /generated/prisma
 /.scannerwork
+
+# TypeDoc generated documentation
+/public/docs
