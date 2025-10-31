@@ -30,16 +30,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const timestamp = new Date().toISOString();
     const path = request.url;
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     // ===========================================================
     // CASO 1: AppException (nuestras excepciones personalizadas)
     // ===========================================================
     if (exception instanceof AppException) {
-      return {
+      const errorResponse: ErrorResponse = {
         ...exception.toJSON(),
         timestamp,
         path,
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
+
+      if (!isProduction && exception instanceof Error) {
+        (errorResponse as any).stack = exception.stack;
+      }
+
+      return errorResponse;
     }
 
     // ====================================================
@@ -56,7 +63,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      return {
+      const errorResponse: ErrorResponse = {
         statusCode: status,
         timestamp,
         path,
@@ -66,12 +73,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
             ? exceptionResponse
             : (exceptionResponse as any).message || exception.message,
         details: typeof exceptionResponse === 'object' ? (exceptionResponse as any) : undefined,
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
+
+      if (!isProduction && exception instanceof Error) {
+        (errorResponse as any).stack = exception.stack;
+      }
+
+      return errorResponse;
     }
 
+    // ========================================
+    // CASO 4: Errores genéricos de JavaScript
+    // ========================================
     if (exception instanceof Error) {
-      return {
+      const errorResponse: ErrorResponse = {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         timestamp,
         path,
@@ -81,10 +96,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
           originalError: exception.message,
         },
         suggestion: 'An unexpected error occurred. Please try again later.',
-        stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
       };
+
+      if (!isProduction) {
+        (errorResponse as any).stack = exception.stack;
+      }
+
+      return errorResponse;
     }
 
+    // ========================================
+    // CASO 5: Errores desconocidos (no Error)
+    // ========================================
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       timestamp,
