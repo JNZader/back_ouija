@@ -1,0 +1,352 @@
+# ==================================================================
+# OUIJA - TESTS DE SESIONES Y ANTI-REPETICIÓN
+# ==================================================================
+# Pruebas del sistema de sesiones, anti-repetición y estadísticas
+
+@baseUrl = http://localhost:3001
+@sessionId = sessions-test-{{$timestamp}}
+
+# ==================================================================
+# Test de Anti-Repetición Básico
+# ==================================================================
+### Test 1a: Primera pregunta (misma pregunta, misma sesión)
+# Verifica:
+#   - method: "keyword-match"
+#   - matchScore > 0
+#   - availableResponses: N (número total de respuestas disponibles)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-antirepeat
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1b: Segunda pregunta (misma pregunta, misma sesión)
+# Verifica:
+#   - Respuesta DIFERENTE a la anterior
+#   - availableResponses: N-1 (una respuesta menos disponible)
+#   - sessionReset: false
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-antirepeat
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1c: Tercera pregunta (misma pregunta, misma sesión)
+# Verifica:
+#   - Respuesta DIFERENTE a las dos anteriores
+#   - availableResponses: N-2 (dos respuestas menos disponibles)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-antirepeat
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1d: Cuarta pregunta (misma pregunta, misma sesión)
+# Verifica:
+#   - Respuesta DIFERENTE a las tres anteriores
+#   - availableResponses: N-3
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-antirepeat
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 1e: Quinta pregunta (misma pregunta, misma sesión)
+# Verifica:
+#   - Respuesta DIFERENTE a las cuatro anteriores
+#   - availableResponses: N-4
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-antirepeat
+
+{
+  "question": "¿Cuándo encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Reset de Sesión
+# ==================================================================
+### Test 2: Agotar todas las respuestas para forzar reset
+# Nota: Repetir esta request múltiples veces hasta que veas:
+#   - sessionReset: true
+#   - availableResponses vuelve al valor inicial
+#   - Las respuestas empiezan a repetirse (ciclo completo)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-reset
+
+{
+  "question": "¿Encontraré el amor?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Sesiones Independientes
+# ==================================================================
+### Test 3a: Usuario 1 - Primera pregunta
+# Verifica:
+#   - Cada usuario tiene su propia sesión
+#   - availableResponses: N
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-user1
+
+{
+  "question": "¿Tendré éxito?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 3b: Usuario 2 - Primera pregunta (misma pregunta)
+# Verifica:
+#   - Sesión independiente de Usuario 1
+#   - availableResponses: N (igual que Usuario 1 al inicio)
+#   - Puede obtener la misma respuesta que Usuario 1
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-user2
+
+{
+  "question": "¿Tendré éxito?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 3c: Usuario 1 - Segunda pregunta
+# Verifica:
+#   - availableResponses: N-1 (continúa su propia sesión)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-user1
+
+{
+  "question": "¿Tendré éxito?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 3d: Usuario 2 - Segunda pregunta
+# Verifica:
+#   - availableResponses: N-1 (continúa su propia sesión)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-user2
+
+{
+  "question": "¿Tendré éxito?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Sesiones por Categoría
+# ==================================================================
+### Test 4a: Sesión con categoría LOVE
+# Verifica:
+#   - category: "love"
+#   - availableResponses para LOVE
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-category
+
+{
+  "question": "¿Encontraré el amor?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 4b: Sesión con categoría CAREER (misma sesión)
+# Verifica:
+#   - category: "career"
+#   - availableResponses para CAREER (independiente de LOVE)
+#   - Las respuestas usadas en LOVE no afectan CAREER
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-category
+
+{
+  "question": "¿Conseguiré trabajo?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 4c: Sesión con categoría LOVE otra vez
+# Verifica:
+#   - availableResponses: N-1 (continúa el conteo de LOVE)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-category
+
+{
+  "question": "¿Mi pareja me ama?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# ESTADÍSTICAS Y MONITOREO
+# ==================================================================
+
+### Test 5: Obtener sesiones activas
+# Endpoint: GET /ouija/responses/sessions
+# Verifica:
+#   - Lista de todas las sesiones activas
+#   - Cada sesión incluye: sessionId, usedResponseIds, lastActivity
+#   - Ejecuta primero varios tests para generar sesiones
+GET {{baseUrl}}/ouija/responses/sessions
+
+
+### Test 6: Obtener estadísticas completas
+# Endpoint: GET /ouija/responses/stats
+# Verifica:
+#   - Status: 200 OK
+#   - database: totalResponses, byPersonality, byCategory, byLanguage
+#   - sessions: activeSessions, totalResponsesUsed, averagePerSession
+#   - performance: totalRequests, fallbackRate, uptime, memoryUsageKB
+GET {{baseUrl}}/ouija/responses/stats
+
+
+# ==================================================================
+# Test de Limpieza de Sesiones (TTL)
+# ==================================================================
+### Test 7: Verificar TTL de sesiones
+# Instrucciones:
+# 1. Ejecuta Test 7a para crear una sesión
+# 2. Espera 16 minutos (SESSION_TTL = 15 min)
+# 3. Ejecuta Test 7b para verificar estadísticas
+# 4. Ejecuta Test 7c con el mismo sessionId
+# Verifica:
+#   - La sesión debe haber sido limpiada
+#   - availableResponses vuelve a N (sesión nueva)
+
+### Test 7a: Crear sesión para TTL
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-ttl-test
+
+{
+  "question": "¿Qué pasará?",
+  "personality": "wise",
+  "language": "es"
+}
+
+### Test 7b: Verificar estadísticas antes de expiración
+GET {{baseUrl}}/ouija/responses/stats
+
+### Test 7c: Verificar sesión después de expiración (esperar 16 min)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-ttl-test
+
+{
+  "question": "¿Qué pasará ahora?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Memoria de Personality
+# ==================================================================
+### Test 8a: Primera pregunta (establece personality)
+# Verifica:
+#   - personality: "cryptic"
+#   - Se guarda en memoria de la sesión
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-personality-memory
+
+{
+  "question": "¿Qué me espera?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 8b: Segunda pregunta (sin especificar personality)
+# Verifica:
+#   - personality: "cryptic" (usa la almacenada)
+#   - PERSONALITY_MEMORY_TTL = 1 hora
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-personality-memory
+
+{
+  "question": "¿Y después?",
+  "language": "es"
+}
+
+
+### Test 8c: Tercera pregunta (cambia personality)
+# Verifica:
+#   - personality: "wise" (nueva personality)
+#   - Se actualiza la memoria
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-personality-memory
+
+{
+  "question": "¿Y luego?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 8d: Cuarta pregunta (sin especificar personality)
+# Verifica:
+#   - personality: "wise" (usa la última almacenada)
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-personality-memory
+
+{
+  "question": "¿Y al final?",
+  "language": "es"
+}
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ Las respuestas no deben repetirse dentro de la misma sesión
+# ✅ availableResponses debe disminuir con cada respuesta usada
+# ✅ sessionReset: true cuando se agotan todas las respuestas
+# ✅ Sesiones independientes por usuario (sessionId)
+# ✅ Respuestas usadas en una categoría no afectan otras categorías
+# ✅ GET /ouija/responses/sessions retorna lista de sesiones activas
+# ✅ GET /ouija/responses/stats retorna estadísticas completas
+# ✅ Sesiones expiran después de SESSION_TTL (15 min)
+# ✅ Personality memory persiste por PERSONALITY_MEMORY_TTL (1 hora)
+# ✅ Cleanup interval elimina sesiones viejas cada 5 minutos

@@ -1,0 +1,306 @@
+# ==================================================================
+# OUIJA - TESTS DE PERSONALIDADES
+# ==================================================================
+# Pruebas de las diferentes personalidades del espíritu
+
+@baseUrl = http://localhost:3001
+@sessionId = personalities-test-{{$timestamp}}
+
+# ==================================================================
+# Personality: WISE (Sabio)
+# ==================================================================
+### Test 1: Personality WISE - Respuesta sabia y reflexiva
+# Características esperadas:
+#   - Tono sabio y reflexivo
+#   - Consejos profundos
+#   - Respuesta meditada
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-wise-1
+
+{
+  "question": "¿Qué debo hacer con mi vida?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 2: Personality WISE - Pregunta sobre amor
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-wise-2
+
+{
+  "question": "¿Encontraré el amor verdadero?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 3: Personality WISE - Pregunta sobre carrera
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-wise-3
+
+{
+  "question": "¿Tendré éxito en mi carrera profesional?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Personality: CRYPTIC (Críptico)
+# ==================================================================
+### Test 4: Personality CRYPTIC - Respuesta misteriosa y enigmática
+# Características esperadas:
+#   - Tono misterioso y críptico
+#   - Respuestas enigmáticas
+#   - Mensajes cifrados o simbólicos
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-cryptic-1
+
+{
+  "question": "¿Qué me espera en el futuro?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 5: Personality CRYPTIC - Pregunta sobre muerte
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-cryptic-2
+
+{
+  "question": "¿Cuándo moriré?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 6: Personality CRYPTIC - Pregunta sobre destino
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-cryptic-3
+
+{
+  "question": "¿Cuál es mi destino?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Personality: DARK (Oscuro)
+# ==================================================================
+### Test 7: Personality DARK - Respuesta oscura y perturbadora
+# Características esperadas:
+#   - Tono oscuro y sombrío
+#   - Mensajes inquietantes
+#   - Atmósfera tenebrosa
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-dark-1
+
+{
+  "question": "¿Hay algo malo en mi casa?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+### Test 8: Personality DARK - Pregunta sobre peligro
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-dark-2
+
+{
+  "question": "¿Estoy en peligro?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+### Test 9: Personality DARK - Pregunta sobre muerte
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-dark-3
+
+{
+  "question": "¿Alguien morirá pronto?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Personality: PLAYFUL (Juguetón)
+# ==================================================================
+### Test 10: Personality PLAYFUL - Respuesta divertida y traviesa
+# Características esperadas:
+#   - Tono divertido y juguetón
+#   - Respuestas con humor
+#   - Atmósfera ligera y alegre
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-playful-1
+
+{
+  "question": "¿Me vas a asustar?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+### Test 11: Personality PLAYFUL - Pregunta casual
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-playful-2
+
+{
+  "question": "¿Qué tal tu día en el más allá?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+### Test 12: Personality PLAYFUL - Pregunta sobre fortuna
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-playful-3
+
+{
+  "question": "¿Ganaré la lotería?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Personality Aleatoria (sin especificar)
+# ==================================================================
+### Test 13: Sin especificar personality - Debe seleccionar aleatoria
+# Verifica:
+#   - personality puede ser cualquiera: wise, cryptic, dark, playful
+#   - metadata debe indicar si fue selección aleatoria
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-random-personality
+
+{
+  "question": "¿Qué personalidad eres?",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Test de Persistencia de Personality
+# ==================================================================
+### Test 14a: Primera pregunta (especifica personality)
+# Verifica:
+#   - personality: "wise"
+#   - Esta personality debe guardarse para la sesión
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-persistence
+
+{
+  "question": "¿Cuál es mi futuro?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 14b: Segunda pregunta (no especifica personality)
+# Verifica:
+#   - personality: "wise" (debe mantener la anterior)
+#   - Persistencia de personality funciona
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-persistence
+
+{
+  "question": "¿Y mi amor?",
+  "language": "es"
+}
+
+
+### Test 14c: Tercera pregunta (cambia personality)
+# Verifica:
+#   - personality: "cryptic" (nuevo valor especificado)
+#   - Se actualiza la personality de la sesión
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-persistence
+
+{
+  "question": "¿Y ahora qué?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Tests Comparativos (misma pregunta, diferentes personalities)
+# ==================================================================
+### Test 15a: Misma pregunta con WISE
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-compare-wise
+
+{
+  "question": "¿Qué debo hacer ahora?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 15b: Misma pregunta con CRYPTIC
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-compare-cryptic
+
+{
+  "question": "¿Qué debo hacer ahora?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 15c: Misma pregunta con DARK
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-compare-dark
+
+{
+  "question": "¿Qué debo hacer ahora?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+### Test 15d: Misma pregunta con PLAYFUL
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-compare-playful
+
+{
+  "question": "¿Qué debo hacer ahora?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ Cada personality debe tener un tono distintivo en sus respuestas
+# ✅ WISE: sabio, reflexivo, profundo
+# ✅ CRYPTIC: misterioso, enigmático, simbólico
+# ✅ DARK: oscuro, sombrío, inquietante
+# ✅ PLAYFUL: divertido, juguetón, ligero
+# ✅ Si no se especifica personality, debe seleccionarse una aleatoria
+# ✅ La personality debe persistir en la sesión si no se especifica otra
+# ✅ Comparar respuestas a la misma pregunta debe mostrar diferencias de tono

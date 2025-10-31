@@ -3,9 +3,6 @@ import { DiskHealthIndicator, HealthCheck, HealthCheckService, MemoryHealthIndic
 import { DatabaseHealthIndicator } from './indicators/database-health.indicator';
 import { AppHealthIndicator } from './indicators/app-health.indicator';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { pid, uptime } from 'process';
-import { error, time } from 'console';
-import { platform } from 'os';
 
 @ApiTags('health')
 @Controller('health')

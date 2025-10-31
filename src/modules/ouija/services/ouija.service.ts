@@ -16,7 +16,21 @@ export class OuijaService {
   async processQuestion(dto: OuijaQuestionDto, userId: string) {
     const startTime = Date.now();
 
-    const personality = dto.personality || this.getRandomPersonality();
+    let personality: Personality;
+    if (dto.personality) {
+      personality = dto.personality;
+      this.responses.setUserPersonality(userId, personality);
+    } else {
+      const savedPersonality = this.responses.getUserPersonality(userId);
+      if (savedPersonality) {
+        personality = savedPersonality;
+      } else {
+        // Obtener la última personalidad usada para no repetirla
+        const lastPersonality = this.responses.getLastPersonalityUsed(userId);
+        personality = this.getRandomPersonality(lastPersonality);
+        this.responses.setUserPersonality(userId, personality);
+      }
+    }
 
     const language = dto.language || Language.ES;
 
@@ -48,8 +62,19 @@ export class OuijaService {
     };
   }
 
-  private getRandomPersonality(): Personality {
-    const personalities = Object.values(Personality);
+  private getRandomPersonality(excludePersonality?: Personality): Personality {
+    let personalities = Object.values(Personality);
+
+    // Si hay una personalidad a excluir, filtrarla
+    if (excludePersonality) {
+      personalities = personalities.filter((p) => p !== excludePersonality);
+    }
+
+    // Si quedó vacío (imposible pero por seguridad), usar todas
+    if (personalities.length === 0) {
+      personalities = Object.values(Personality);
+    }
+
     const randomIndex = Math.floor(Math.random() * personalities.length);
 
     return personalities[randomIndex];

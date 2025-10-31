@@ -1,0 +1,49 @@
+# ==================================================================
+# HEALTH CHECK TESTS
+# ==================================================================
+# Pruebas de los endpoints de salud del sistema
+# Útiles para monitoreo y Kubernetes probes
+
+@baseUrl = http://localhost:3001
+
+# ==================================================================
+# Liveness Probe
+# ==================================================================
+### Health Check 1: Liveness (app + database)
+# Endpoint: GET /health
+# Uso: Kubernetes livenessProbe - Verifica si la app está viva
+# Incluye: app (version, uptime, environment) + database (responseTime)
+# Respuesta esperada: 200 OK con status "ok"
+GET {{baseUrl}}/health
+
+
+# ==================================================================
+# Readiness Probe
+# ==================================================================
+### Health Check 2: Readiness (database + memory)
+# Endpoint: GET /health/ready
+# Uso: Kubernetes readinessProbe - Verifica si puede recibir tráfico
+# Incluye: database + memory_heap (threshold: 150MB) + memory_rss (threshold: 300MB)
+# Respuesta esperada: 200 OK si todos los checks pasan
+GET {{baseUrl}}/health/ready
+
+
+# ==================================================================
+# Detailed Health Check
+# ==================================================================
+### Health Check 3: Detailed (monitoreo completo)
+# Endpoint: GET /health/detailed
+# Uso: Monitoreo completo para dashboards y alertas
+# Incluye: app + database + memory + disk (threshold: 90%)
+# Respuesta esperada: JSON con detalles de todos los indicadores
+GET {{baseUrl}}/health/detailed
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ Todos los endpoints deben retornar 200 OK cuando el sistema está saludable
+# ✅ /health debe incluir: status, info (app, database), details
+# ✅ /health/ready debe incluir: database, memory_heap, memory_rss
+# ✅ /health/detailed debe incluir: app, database, memory, disk
+# ❌ Si algún servicio falla, debe retornar 503 Service Unavailable

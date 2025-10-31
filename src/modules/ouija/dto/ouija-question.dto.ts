@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { Language, Personality } from '../enums';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -12,6 +12,7 @@ export class OuijaQuestionDto {
   @IsString()
   @MinLength(3, { message: 'La pregunta debe tener al menos 3 caracteres' })
   @MaxLength(200, { message: 'La pregunta no puede exceder los 200 caracteres' })
+  @Matches(/\S/, { message: 'La pregunta no puede estar vacía o contener solo espacios' })
   question: string;
 
   @ApiProperty({

@@ -1,0 +1,282 @@
+# ==================================================================
+# OUIJA - TESTS DE CATEGORÍAS
+# ==================================================================
+# Pruebas de clasificación de preguntas en diferentes categorías
+
+@baseUrl = http://localhost:3001
+@sessionId = categories-test-{{$timestamp}}
+
+# ==================================================================
+# Categoría: LOVE (Amor)
+# ==================================================================
+### Test 1: Categoría LOVE - Pregunta sobre amor
+# Keywords esperadas: amor, pareja, relación, corazón, sentimientos
+# Verifica:
+#   - category: "love"
+#   - matchedKeywords incluye términos de amor
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-love
+
+{
+  "question": "¿Encontraré el amor verdadero pronto?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 2: Categoría LOVE - Pregunta sobre relación
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-love
+
+{
+  "question": "¿Mi relación de pareja durará para siempre?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: CAREER (Carrera)
+# ==================================================================
+### Test 3: Categoría CAREER - Pregunta sobre trabajo
+# Keywords esperadas: trabajo, empleo, carrera, ascenso, jefe
+# Verifica:
+#   - category: "career"
+#   - matchedKeywords incluye términos laborales
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-career
+
+{
+  "question": "¿Me ascenderán en mi trabajo este año?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 4: Categoría CAREER - Pregunta sobre empleo
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-career
+
+{
+  "question": "¿Conseguiré el empleo que deseo?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: HEALTH (Salud)
+# ==================================================================
+### Test 5: Categoría HEALTH - Pregunta sobre salud
+# Keywords esperadas: salud, enfermedad, medicina, doctor, curar
+# Verifica:
+#   - category: "health"
+#   - matchedKeywords incluye términos de salud
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-health
+
+{
+  "question": "¿Mejoraré de mi enfermedad pronto?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 6: Categoría HEALTH - Pregunta sobre bienestar
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-health
+
+{
+  "question": "¿Mi salud mejorará este mes?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: FAMILY (Familia)
+# ==================================================================
+### Test 7: Categoría FAMILY - Pregunta sobre familia
+# Keywords esperadas: familia, madre, padre, hijo, hermano
+# Verifica:
+#   - category: "family"
+#   - matchedKeywords incluye términos familiares
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-family
+
+{
+  "question": "¿Cómo está mi madre en el más allá?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 8: Categoría FAMILY - Pregunta sobre hijos
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-family
+
+{
+  "question": "¿Tendré hijos en el futuro?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: DEATH (Muerte)
+# ==================================================================
+### Test 9: Categoría DEATH - Pregunta sobre muerte
+# Keywords esperadas: muerte, morir, fallecimiento, difunto
+# Verifica:
+#   - category: "death"
+#   - matchedKeywords incluye términos de muerte
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-death
+
+{
+  "question": "¿Cuándo moriré?",
+  "personality": "dark",
+  "language": "es"
+}
+
+
+### Test 10: Categoría DEATH - Pregunta sobre fallecidos
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-death
+
+{
+  "question": "¿Mi abuelo fallecido está en paz?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: FUTURE (Futuro)
+# ==================================================================
+### Test 11: Categoría FUTURE - Pregunta sobre destino
+# Keywords esperadas: futuro, destino, mañana, predicción
+# Verifica:
+#   - category: "future"
+#   - matchedKeywords incluye términos de futuro
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-future
+
+{
+  "question": "¿Qué me depara el destino?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 12: Categoría FUTURE - Pregunta sobre predicción
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-future
+
+{
+  "question": "¿Qué pasará en mi futuro cercano?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: MONEY (Dinero)
+# ==================================================================
+### Test 13: Categoría MONEY - Pregunta sobre dinero
+# Keywords esperadas: dinero, fortuna, riqueza, éxito, financiero
+# Verifica:
+#   - category: "money"
+#   - matchedKeywords incluye términos financieros
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-money
+
+{
+  "question": "¿Tendré éxito financiero este año?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+### Test 14: Categoría MONEY - Pregunta sobre fortuna
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-money
+
+{
+  "question": "¿Ganaré la lotería pronto?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: SPIRITUALITY (Espiritualidad)
+# ==================================================================
+### Test 15: Categoría SPIRITUALITY - Pregunta espiritual
+# Keywords esperadas: espíritu, alma, espiritual, energía, aura
+# Verifica:
+#   - category: "spirituality"
+#   - matchedKeywords incluye términos espirituales
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-spirituality
+
+{
+  "question": "¿Mi alma está en paz?",
+  "personality": "wise",
+  "language": "es"
+}
+
+
+### Test 16: Categoría SPIRITUALITY - Pregunta sobre energía
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-spirituality
+
+{
+  "question": "¿Tengo buena energía espiritual?",
+  "personality": "cryptic",
+  "language": "es"
+}
+
+
+# ==================================================================
+# Categoría: GENERAL
+# ==================================================================
+### Test 17: Categoría GENERAL - Pregunta sin keywords específicas
+# Verifica:
+#   - category: "general"
+#   - method puede ser "random" o "fallback-general"
+POST {{baseUrl}}/ouija/ask
+Content-Type: application/json
+X-Session-Id: {{sessionId}}-general
+
+{
+  "question": "¿Hola, estás ahí?",
+  "personality": "playful",
+  "language": "es"
+}
+
+
+# ==================================================================
+# VALIDACIONES ESPERADAS
+# ==================================================================
+# ✅ Cada pregunta debe clasificarse correctamente en su categoría
+# ✅ Las keywords matcheadas deben corresponder a la categoría detectada
+# ✅ method debe ser "keyword-match" cuando hay keywords relevantes
+# ✅ matchScore debe ser > 0 cuando hay keywords matcheadas
+# ✅ category puede ser: love, career, health, family, death, future, money, spirituality, general
