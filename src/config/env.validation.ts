@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const validationSchema = {
+export const validationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   PORT: Joi.number().default(3001),
   DATABASE_URL: Joi.string().uri().required(),
@@ -11,4 +11,4 @@ export const validationSchema = {
   THROTTLE_MEDIUM_LIMIT: Joi.number().default(20),
   THROTTLE_LONG_TTL: Joi.number().default(60000),
   THROTTLE_LONG_LIMIT: Joi.number().default(100),
-};
+});
